@@ -573,3 +573,22 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 .ld-video-mute .material-symbols-outlined { font-size: 14px; }
 .ld-video-desc { flex: none; margin: 0; font-size: 14px; line-height: 1.5; color: var(--c-text-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .ld-video-foot { flex: none; display: flex; align-items: center; justify-content: flex-end; }
+
+/* ===== EXPRISM 회사 소개 (손님 서버 root, 간략 버전) ===== */
+.intro {
+  min-height: 100dvh;
+  display: flex; align-items: center; justify-content: center;
+  padding: calc(var(--sat) + 24px) 24px calc(var(--sab) + 24px);
+  background: radial-gradient(120% 120% at 50% 0%, #1c1650 0%, #0f0b30 55%, #08061c 100%);
+  color: #fff; text-align: center;
+}
+.intro-inner { max-width: 420px; width: 100%; }
+.intro-mark {
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-weight: 800; font-size: 40px; letter-spacing: 0.14em;
+  background: linear-gradient(90deg, #fff, #b9aeff);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.intro-slogan { margin-top: 14px; font-size: 15px; font-weight: 600; color: #c9c2ff; }
+.intro-desc { margin-top: 22px; font-size: 14px; line-height: 1.7; color: #a9a4c8; }
+.intro-foot { margin-top: 40px; font-size: 12px; color: #6a6790; letter-spacing: 0.05em; }

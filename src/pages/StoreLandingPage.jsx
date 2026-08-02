@@ -77,7 +77,12 @@ export default function StoreLandingPage() {
         setHome(h); setShopName(h.shopName || '')
         setCategories((m.categories || []).filter((c) => (c.items || []).length > 0))
       })
-      .catch((e) => { if (alive) setFatal(e.message) })
+      .catch((e) => {
+        if (!alive) return
+        // 운영중이 아닌 가게·없는 업체코드(404) → EXPRISM 회사 소개(root)로.
+        if (e.status === 404) { navigate('/', { replace: true }); return }
+        setFatal(e.message)
+      })
       .finally(() => { if (alive) setLoading(false) })
     // 광고는 메뉴판에서만 쓰지만, 실패해도 조용히.
     shopApi.ad().then((a) => { if (alive && a?.enabled && a.imageUrl) setAd(a) }).catch(() => {})

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Icon from '../components/Icon'
 import OptionSheet from '../components/OptionSheet'
 import CartSheet from '../components/CartSheet'
@@ -14,6 +14,7 @@ import { useI18n } from '../i18n-context'
 
 export default function TableOrderPage({ mode = 'table' }) {
   const { tenantCode, tableCode } = useParams()
+  const navigate = useNavigate()
   const takeout = mode === 'takeout'
   const { lang, changeLang, translating, tr, L, registerTexts } = useI18n()
 
@@ -65,7 +66,12 @@ export default function TableOrderPage({ mode = 'table' }) {
         setCategories(cats)
         setActiveCat(cats[0]?.id ?? null)
       })
-      .catch((e) => { if (alive) setFatal(e.message) })
+      .catch((e) => {
+        if (!alive) return
+        // 운영중이 아닌 가게·없는 업체코드/테이블(404) → EXPRISM 회사 소개(root)로.
+        if (e.status === 404) { navigate('/', { replace: true }); return }
+        setFatal(e.message)
+      })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
   }, [tenantCode, tableCode, takeout])

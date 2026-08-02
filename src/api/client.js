@@ -11,7 +11,10 @@ async function request(path, { method = 'GET', body } = {}) {
   const data = text ? JSON.parse(text) : null
   if (!res.ok) {
     const message = data?.message || '요청을 처리하지 못했습니다.'
-    throw new Error(message)
+    const err = new Error(message)
+    err.status = res.status
+    err.code = data?.code
+    throw err
   }
   return data
 }
