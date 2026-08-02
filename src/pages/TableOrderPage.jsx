@@ -268,6 +268,10 @@ export default function TableOrderPage({ mode = 'table' }) {
               <span className="myo-count">{myOrders.length}</span>
             </button>
           )}
+          {/* 가게 홈 — 가게 소개 랜딩(미니룸/소개)으로. 가게소개 메뉴판 뷰의 '가게 홈'과 동일. */}
+          <button className="myo-btn home-btn" onClick={() => navigate(`/${tenantCode}`)}>
+            <Icon name="cottage" /> {L('home')}
+          </button>
         </div>
       </div>
 
