@@ -4,3 +4,8 @@ dist-ssr
 *.local
 .vite
 .DS_Store
+
+# taste-skill 설치본. skills-lock.json 으로 재설치할 수 있어 저장소에 담지 않는다.
+#   npx skills add https://github.com/Leonxlnx/taste-skill
+.agents/
+.claude/
