@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import '../../company.css'
-import { BRAND, NAV, NAV_FLAT, CONTACT } from '../../company-data'
+import { BRAND, NAV, NAV_EXPRISM, NAV_FLAT, CONTACT } from '../../company-data'
 
 /**
  * 회사 사이트의 공통 껍데기 — 상단바 + 내비게이션 + 푸터.
@@ -22,6 +22,90 @@ export default function SiteShell({ children, solidHeader = false, title }) {
       <main>{children}</main>
       <SiteFooter />
     </div>
+  )
+}
+
+/**
+ * exprism.co.kr 은 제품 홍보 전용이다. 회사 메뉴(회사정보·디자인 시안 등)를 띄우지 않고
+ * 제품 안에서만 움직이게 한다. 회사 소개가 필요하면 kanchenjunga.co.kr 로 보낸다.
+ */
+function isProductHost() {
+  if (typeof window === 'undefined') return false
+  return /(^|\.)exprism\.co\.kr$/i.test(window.location.hostname)
+}
+
+/**
+ * 상단 로고에 무엇을 앞세울지.
+ * 제품 도메인에서는 EXPRISM 이 주인공이고 KANCHENJUNGA 는 만든 회사로 물러난다.
+ * 회사 도메인에서는 그 반대다.
+ */
+function brandMark() {
+  return isProductHost()
+    ? { mark: 'EXPRISM', sub: `BY ${BRAND.name}` }
+    : { mark: BRAND.name, sub: BRAND.sub }
+}
+
+/**
+ * 지금 화면에 보이는 구역의 id 를 돌려준다.
+ *
+ * 내비에 같은 화면 안의 앵커(/#guest)가 있을 때 쓴다. 라우터는 해시를 경로로 보지 않아
+ * NavLink 로는 이 구분을 못 한다(그렇게 뒀더니 /, /#guest, /#owner 가 전부 활성으로 켜졌다).
+ *
+ * scroll 이벤트를 듣지 않는다. 화면 한가운데에 좁은 띠를 만들어 두고,
+ * 어떤 구역이 그 띠를 지나는지만 IntersectionObserver 로 받는다.
+ */
+function useVisibleSection(items) {
+  const [id, setId] = useState('')
+  const key = items.map((n) => n.to).join(',')
+
+  useEffect(() => {
+    const ids = items.filter((n) => n.to.includes('#')).map((n) => n.to.split('#')[1])
+    const els = ids.map((x) => document.getElementById(x)).filter(Boolean)
+    if (!els.length) return undefined
+
+    const seen = new Set()
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => (e.isIntersecting ? seen.add(e.target.id) : seen.delete(e.target.id)))
+        // 여러 구역이 걸치면 문서 순서상 앞선 것을 고른다.
+        const first = ids.find((x) => seen.has(x))
+        setId(first || '')
+      },
+      // 위 40%, 아래 55% 를 잘라내 화면 가운데만 판정에 쓴다.
+      // 그래야 구역이 화면에 "들어오는 순간" 이 아니라 "읽고 있는 순간" 에 바뀐다.
+      { rootMargin: '-40% 0px -55% 0px' },
+    )
+    els.forEach((e) => io.observe(e))
+    return () => io.disconnect()
+  }, [key, items])
+
+  return id
+}
+
+/**
+ * 내비 항목 하나.
+ * 앵커(/#guest)는 라우트가 아니라 같은 화면 안의 이동이므로 평범한 a 로 내보내고,
+ * 활성 여부는 지금 보고 있는 구역으로 판단한다.
+ */
+function NavItem({ to, label, visibleSection }) {
+  if (to.includes('#')) {
+    const anchor = to.split('#')[1]
+    return (
+      <a href={to} className={visibleSection === anchor ? 'on' : ''}>
+        {label}
+      </a>
+    )
+  }
+  // 앵커가 있는 메뉴에서 "맨 위" 항목은 어떤 구역도 보이지 않을 때만 켠다.
+  const hasAnchors = to === '/' && visibleSection !== undefined
+  return (
+    <NavLink
+      to={to}
+      end
+      className={({ isActive }) => (isActive && (!hasAnchors || !visibleSection) ? 'on' : '')}
+    >
+      {label}
+    </NavLink>
   )
 }
 
@@ -61,6 +145,9 @@ function SiteHeader({ solid }) {
     }
   }, [open])
 
+  const navItems = isProductHost() ? NAV_EXPRISM : NAV
+  const visibleSection = useVisibleSection(navItems)
+
   const isSolid = solid || scrolled
 
   return (
@@ -71,12 +158,12 @@ function SiteHeader({ solid }) {
       <header className={`kc-head${isSolid ? ' is-solid' : ''}`}>
         <div className="kc-head-inner">
           <Link className="kc-logo" to="/" aria-label="홈으로">
-            <span className="kc-logo-mark">{BRAND.name}</span>
-            <span className="kc-logo-sub">{BRAND.sub}</span>
+            <span className="kc-logo-mark">{brandMark().mark}</span>
+            <span className="kc-logo-sub">{brandMark().sub}</span>
           </Link>
 
           <nav className="kc-nav">
-            {NAV.map((n) =>
+            {navItems.map((n) =>
               n.children ? (
                 // 상위 메뉴. 마우스를 올리거나(hover) 자식에 포커스가 가면(focus-within) 펼쳐진다.
                 // 상위 자체는 이동 경로가 없어 button 이 아니라 그냥 표시용이다.
@@ -97,9 +184,7 @@ function SiteHeader({ solid }) {
                   </div>
                 </div>
               ) : (
-                <NavLink key={n.to} to={n.to} className={({ isActive }) => (isActive ? 'on' : '')}>
-                  {n.label}
-                </NavLink>
+                <NavItem key={n.to} to={n.to} label={n.label} visibleSection={visibleSection} />
               ),
             )}
           </nav>
@@ -120,16 +205,14 @@ function SiteHeader({ solid }) {
       <div className={`kc-drawer-back${open ? ' open' : ''}`} onClick={() => setOpen(false)} />
       <nav className={`kc-drawer${open ? ' open' : ''}`} aria-hidden={!open}>
         <div className="kc-drawer-head">
-          <span className="kc-logo-mark">{BRAND.name}</span>
+          <span className="kc-logo-mark">{brandMark().mark}</span>
           <button type="button" className="kc-drawer-x" aria-label="메뉴 닫기" onClick={() => setOpen(false)}>
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
-        {NAV.map((n) =>
+        {navItems.map((n) =>
           n.children ? <DrawerGroup key={n.label} item={n} /> : (
-            <NavLink key={n.to} to={n.to} className={({ isActive }) => (isActive ? 'on' : '')}>
-              {n.label}
-            </NavLink>
+            <NavItem key={n.to} to={n.to} label={n.label} visibleSection={visibleSection} />
           ),
         )}
         <Link className="kc-btn kc-btn-primary" to="/contact">
@@ -191,6 +274,10 @@ function SiteFooter() {
             <h4>{BRAND.name}</h4>
             <p>
               {CONTACT.address}
+              <br />
+              대표 {CONTACT.ceo}
+              <br />
+              사업자등록번호 {CONTACT.bizNo}
               <br />
               TEL: {CONTACT.phone}
               <br />

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import TableOrderPage from './pages/TableOrderPage'
 import StoreLandingPage from './pages/StoreLandingPage'
 import HomePage from './pages/company/HomePage'
+import ExprismPage from './pages/company/ExprismPage'
 import AboutPage from './pages/company/AboutPage'
 import GreetingPage from './pages/company/GreetingPage'
 import OrgPage from './pages/company/OrgPage'
@@ -44,6 +45,13 @@ function ScrollToTop() {
   return null
 }
 
+
+/** exprism.co.kr(및 www) 로 들어왔는가. 로컬·IP 접속에서는 false 라 회사 사이트가 뜬다. */
+function isExprismHost() {
+  if (typeof window === 'undefined') return false
+  return /(^|\.)exprism\.co\.kr$/i.test(window.location.hostname)
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -51,7 +59,15 @@ export default function App() {
         <ScrollToTop />
         <Routes>
           {/* KANCHENJUNGA 회사 사이트 */}
-          <Route path="/" element={<HomePage />} />
+          {/*
+            첫 화면은 도메인에 따라 갈린다.
+              exprism.co.kr  → EXPRISM 제품 소개
+              그 외          → KANCHENJUNGA 회사 소개
+            한 벌의 빌드로 두 도메인을 서빙하므로 서버가 아니라 여기서 나눈다.
+            회사 사이트의 나머지 화면(/company, /notice …)은 두 도메인에서 모두 열린다.
+          */}
+          <Route path="/" element={isExprismHost() ? <ExprismPage /> : <HomePage />} />
+          <Route path="/exprism" element={<ExprismPage />} />
           {/* 회사정보 묶음 — 상위(회사정보)는 이동할 곳이 없고 자식만 화면을 가진다. */}
           <Route path="/company" element={<AboutPage />} />
           <Route path="/company/greeting" element={<GreetingPage />} />

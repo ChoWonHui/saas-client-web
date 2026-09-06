@@ -342,6 +342,34 @@ html:has(.kc) { scroll-behavior: smooth; }
 .kc-svc-more .material-symbols-outlined { font-size: 18px; transition: transform .2s; }
 .kc-svc-item.is-link:hover .kc-svc-more .material-symbols-outlined { transform: translateX(4px); }
 
+/* ===== 메인: 자사 솔루션 ===== */
+
+/* 수주 업무 카드(3단)와 성격이 달라 구성을 바꾼다.
+   사진을 왼쪽에 세우고 글을 오른쪽에 붙인다. */
+.kc-prod { padding: var(--kc-gap-sec) 0; background: var(--kc-bg); }
+.kc-prod-inner { display: grid; grid-template-columns: .5fr 1fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
+.kc-prod-shot { border-radius: var(--kc-r); overflow: hidden; border: 1px solid var(--kc-line); background: var(--kc-surface); }
+.kc-prod-shot img { width: 100%; height: auto; display: block; }
+.kc-prod-mark {
+  font-family: 'Hanken Grotesk', sans-serif; font-size: 13px; font-weight: 800;
+  letter-spacing: .22em; color: var(--kc-accent);
+}
+.kc-prod h2 { margin-top: 12px !important; font-size: clamp(23px, 2.6vw, 32px); font-weight: 800; letter-spacing: -.03em; line-height: 1.35; }
+.kc-prod-desc { margin-top: 16px !important; max-width: 56ch; font-size: 16px; line-height: 1.9; color: var(--kc-text-2); }
+.kc-prod .kc-btn { margin-top: 26px; }
+
+/* 사업분야가 셋이 되면서 3단으로 간다. 첫 칸을 넓히던 비대칭은 항목이 둘일 때 쓰던 것이다. */
+.kc-svc-3 { grid-template-columns: repeat(3, 1fr); }
+
+@media (max-width: 960px) {
+  .kc-prod-inner { grid-template-columns: 1fr; }
+  .kc-prod-shot { max-width: 300px; }
+  .kc-svc-3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  .kc-svc-3 { grid-template-columns: 1fr; }
+}
+
 /* ===== 메인: 소식 + 문의 ===== */
 
 /* 예전에는 같은 크기 흰 패널 두 장이었다. 공지는 여러 건의 목록이고 문의는
@@ -371,6 +399,108 @@ html:has(.kc) { scroll-behavior: smooth; }
 /* 좁은 화면: 두 구성 모두 한 줄로 쌓는다. */
 @media (max-width: 860px) {
   .kc-svc, .kc-close { grid-template-columns: 1fr; }
+}
+
+/* 만든 회사. 글 왼쪽 + 목록 오른쪽. 앞의 언어 띠(사진 왼쪽)와 구성이 겹치지 않는다. */
+.ex-maker { display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(32px, 5vw, 72px); align-items: start; }
+.ex-mark-dark { color: var(--kc-accent); }
+.ex-maker h2 { margin-top: 12px !important; font-size: clamp(23px, 2.6vw, 32px); font-weight: 800; letter-spacing: -.03em; line-height: 1.35; }
+.ex-maker-desc { margin-top: 16px !important; max-width: 56ch; font-size: 16px; line-height: 1.9; color: var(--kc-text-2); }
+.ex-maker .kc-btn { margin-top: 26px; }
+.ex-maker-list { border-top: 1px solid var(--kc-line); }
+.ex-maker-list li { display: flex; flex-direction: column; gap: 5px; padding: 18px 2px; border-bottom: 1px solid var(--kc-line); }
+.ex-maker-list strong { font-size: 16.5px; font-weight: 800; letter-spacing: -.02em; }
+.ex-maker-list span { font-size: 14.5px; color: var(--kc-text-2); }
+@media (max-width: 960px) { .ex-maker { grid-template-columns: 1fr; } }
+
+/* ===== EXPRISM 제품 소개 ===== */
+
+/* 히어로. 회사 사이트와 같은 좌우 분할이지만 오른쪽이 사진이 아니라 실제 앱 화면이라
+   꽉 채우지 않고 여백 안에 세워 둔다. */
+.ex-hero { align-items: center; }
+.ex-hero .kc-hero-inner { padding-bottom: 56px; }
+.ex-mark {
+  font-family: 'Hanken Grotesk', sans-serif; font-size: 13px; font-weight: 800;
+  letter-spacing: .22em; color: #7dabff;
+}
+.ex-hero h1 { margin-top: 14px !important; }
+.ex-hero-shot {
+  display: flex; align-items: center; justify-content: center;
+  padding: calc(var(--kc-head-h) + 32px) clamp(24px, 3vw, 56px) 48px 0;
+}
+.ex-hero-shot img,
+.ex-hero-shot video {
+  width: min(268px, 72%); height: auto; border-radius: 22px;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 45%);
+  display: block;
+}
+/* 기본은 움직이는 캡쳐를 보여주고 정지본은 숨긴다. */
+.ex-hero-still { display: none; }
+/* 애니메이션을 꺼 달라고 설정한 사용자에게는 정지본으로 바꾼다.
+   GIF 는 재생을 멈출 방법이 없어 CSS 로 통째로 바꾸는 수밖에 없다. */
+@media (prefers-reduced-motion: reduce) {
+  .ex-hero-motion { display: none; }
+  .ex-hero-still { display: block; }
+}
+
+/* 손님 화면 세 장. 사진 아래에 글을 붙인 세로 묶음이라 뒤의 기능 목록과 리듬이 다르다. */
+.ex-shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(24px, 3vw, 44px); }
+.ex-shot { border-radius: var(--kc-r); overflow: hidden; background: var(--kc-bg); border: 1px solid var(--kc-line); }
+.ex-shot img { width: 100%; height: auto; display: block; }
+.ex-shots h3 { margin-top: 20px !important; font-size: 19px; font-weight: 800; letter-spacing: -.02em; }
+.ex-shots p { margin-top: 9px !important; font-size: 15px; line-height: 1.8; color: var(--kc-text-2); }
+
+/* 사장님 화면도 휴대폰 캡쳐라 손님 화면과 같은 세로 묶음이다.
+   장수만 넷이라 4단으로 놓는다. */
+.ex-shots-4 { grid-template-columns: repeat(4, 1fr); }
+
+/* 화면으로 보여주지 않는 나머지 기능. 사진 없이 가로선으로만 끊는다. */
+.ex-feat { margin-top: clamp(48px, 6vw, 84px) !important; }
+
+.ex-feat { display: grid; grid-template-columns: 1fr 1fr; gap: 0 clamp(32px, 4vw, 64px); border-top: 1px solid var(--kc-line); }
+.ex-feat li { display: flex; gap: 16px; padding: 24px 2px; border-bottom: 1px solid var(--kc-line); }
+.ex-feat-no {
+  flex: none; padding-top: 3px;
+  font-family: 'Hanken Grotesk', sans-serif; font-size: 13px; font-weight: 800;
+  letter-spacing: .1em; color: var(--kc-accent);
+}
+.ex-feat h3 { font-size: 17.5px; font-weight: 800; letter-spacing: -.02em; }
+.ex-feat p { margin-top: 7px !important; font-size: 15px; line-height: 1.8; color: var(--kc-text-2); }
+
+/* 언어. 짙은 바탕의 넓은 띠 하나. 앞뒤 섹션과 색으로 구분된다. */
+.ex-lang { padding: var(--kc-gap-sec) 0; background: var(--kc-ink); color: #fff; }
+/* 사진을 왼쪽에 둔다. 히어로가 이미 "글 왼쪽 + 사진 오른쪽" 이라
+   같은 구성을 두 번 쓰면 화면이 한 가지 리듬으로만 읽힌다. */
+.ex-lang-inner { display: grid; grid-template-columns: .75fr 1.25fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
+.ex-lang-inner > .ex-lang-shot { order: -1; }
+.ex-lang h2 { font-size: clamp(24px, 2.8vw, 34px); font-weight: 800; letter-spacing: -.03em; line-height: 1.35; }
+.ex-lang p { margin-top: 18px !important; max-width: 56ch; font-size: 16px; line-height: 1.9; color: rgb(226 235 250 / 78%); }
+.ex-lang-list { margin-top: 26px !important; display: flex; flex-wrap: wrap; gap: 8px; }
+.ex-lang-list li {
+  padding: 7px 15px; border-radius: 999px; border: 1px solid rgb(255 255 255 / 22%);
+  font-size: 14.5px; font-weight: 600; color: rgb(226 235 250 / 92%);
+}
+.ex-lang-shot { border-color: rgb(255 255 255 / 14%); background: rgb(255 255 255 / 6%); }
+.ex-lang-shot img { width: 100%; }
+
+@media (max-width: 960px) {
+  .ex-shots { grid-template-columns: 1fr 1fr; }
+  .ex-feat { grid-template-columns: 1fr; }
+  /* 1열로 접히면 사진이 먼저, 글이 뒤에 오는 순서로 통일한다. */
+  .ex-shots-4 { grid-template-columns: 1fr 1fr; }
+  .ex-lang-inner { grid-template-columns: 1fr; }
+  /* 1열로 접히면 글이 먼저 오는 편이 읽기 순서에 맞다. */
+  .ex-lang-inner > .ex-lang-shot { order: 0; }
+  /* 1열이 되면 화면 사진이 너무 커진다. 읽는 폭 안으로 묶는다. */
+  .ex-lang-shot { max-width: 320px; }
+}
+
+@media (max-width: 640px) {
+  /* 히어로 사진은 좁은 화면에서 글 위로 올라간다(.kc-hero 규칙). 높이를 줄여 글이 먼저 보이게 한다. */
+  .ex-hero .kc-hero-inner { padding-bottom: 40px; }
+  .ex-hero-shot { padding: 24px 24px 0; }
+  .ex-hero-shot img { width: min(200px, 56%); }
+  .ex-shots { grid-template-columns: 1fr; max-width: 340px; }
 }
 
 /* ===== 공통: 화면을 닫는 띠 ===== */

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SiteShell, { SecHead } from '../../components/company/SiteShell'
-import { BRAND, HOME_SERVICES, HOME_CTA, NOTICES } from '../../company-data'
+import { BRAND, HOME_SERVICES, HOME_PRODUCT, HOME_CTA, NOTICES } from '../../company-data'
 
 /**
  * KANCHENJUNGA 메인 — 손님 서버 root(/).
@@ -15,6 +15,7 @@ export default function HomePage() {
     <SiteShell>
       <Hero />
       <Services />
+      <Product />
       <Statement />
       <NoticeAndInquiry />
     </SiteShell>
@@ -131,7 +132,7 @@ function Services() {
       <div className="kc-wrap">
         <SecHead
           title="사업분야 소개"
-          desc={`대한민국 IT 산업을 이끌어가는 ${BRAND.name}의 다양한 사업 분야를 소개합니다.`}
+          desc="새로 만드는 일과 이미 있는 것을 돌보는 일을 함께 합니다."
         />
         {/*
           카드 껍데기(테두리·그림자·들어올림)를 벗겼다. 항목이 둘뿐이라 테두리가
@@ -139,7 +140,7 @@ function Services() {
           세 번 반복되던 구성이다. 지금은 사진과 여백이 경계를 대신하고,
           첫 칸을 넓게 잡아 주력 사업이 먼저 읽히게 한다.
         */}
-        <div className="kc-svc">
+        <div className="kc-svc kc-svc-3">
           {HOME_SERVICES.map((s, i) => {
             // to 가 있으면 블록 전체가 링크가 된다. 없으면 소개 글로 남는다
             // (a 태그로 감싸면 갈 곳 없는 링크가 되어 키보드·스크린리더에 걸린다).
@@ -178,6 +179,31 @@ function Services() {
               </Block>
             )
           })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/*
+ * 자사 솔루션. 수주 업무(위 사업분야)와 성격이 달라 구성도 다르게 간다.
+ * 사진을 왼쪽에 세우고 글을 오른쪽에 붙여, 앞 섹션의 3단 격자와 리듬이 겹치지 않게 한다.
+ */
+function Product() {
+  return (
+    <section className="kc-prod">
+      <div className="kc-wrap kc-prod-inner">
+        <div className="kc-prod-shot">
+          <img src={HOME_PRODUCT.img} alt={HOME_PRODUCT.alt} width="640" height="1385" loading="lazy" decoding="async" />
+        </div>
+        <div>
+          <p className="kc-prod-mark">{HOME_PRODUCT.name}</p>
+          <h2>{HOME_PRODUCT.title}</h2>
+          <p className="kc-prod-desc">{HOME_PRODUCT.desc}</p>
+          <Link className="kc-btn kc-btn-primary" to={HOME_PRODUCT.to}>
+            제품 자세히 보기
+            <span className="material-symbols-outlined">arrow_forward</span>
+          </Link>
         </div>
       </div>
     </section>
