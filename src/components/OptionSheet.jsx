@@ -8,8 +8,11 @@ import { useI18n } from '../i18n-context'
  * 메뉴 1개의 옵션을 고르고 수량을 정해 담는 바텀시트.
  * - required 그룹은 최소 1개 선택해야 담기 버튼이 활성화된다.
  * - multiple=true 면 다중 선택(체크박스), 아니면 단일 선택(라디오).
+ *
+ * readOnly 면 주문이 없는 가게(메뉴판 전용)라 담기·수량을 감춘다.
+ * 옵션은 "이런 선택지가 있다" 는 안내로만 남기고 고를 수 없게 한다.
  */
-export default function OptionSheet({ item, onClose, onAdd }) {
+export default function OptionSheet({ item, onClose, onAdd, readOnly = false }) {
   const { tr, L } = useI18n()
   const groups = item.optionGroups || []
   // 단일 선택 그룹은 required 면 첫 옵션을 기본 선택.
@@ -105,10 +108,17 @@ export default function OptionSheet({ item, onClose, onAdd }) {
               {(g.options || []).map((o) => {
                 const on = (selected[g.id] || []).includes(o.id)
                 return (
-                  <button key={o.id} className={`opt-row${on ? ' on' : ''}`} onClick={() => toggle(g, o)}>
-                    <span className={`opt-check${g.multiple ? '' : ' radio'}`}>
-                      <Icon name="check" />
-                    </span>
+                  <button
+                    key={o.id}
+                    className={`opt-row${on && !readOnly ? ' on' : ''}`}
+                    onClick={() => { if (!readOnly) toggle(g, o) }}
+                    disabled={readOnly}
+                  >
+                    {!readOnly && (
+                      <span className={`opt-check${g.multiple ? '' : ' radio'}`}>
+                        <Icon name="check" />
+                      </span>
+                    )}
                     <span className="opt-label">{tr(o.name)}</span>
                     {o.extraPrice > 0 && <span className="opt-extra">+{won(o.extraPrice)}</span>}
                   </button>
@@ -118,6 +128,11 @@ export default function OptionSheet({ item, onClose, onAdd }) {
           ))}
         </div>
 
+        {readOnly ? (
+          <div className="sheet-foot">
+            <button className="btn-primary" onClick={onClose}>{L('menuOnlyClose')}</button>
+          </div>
+        ) : (
         <div className="sheet-foot">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <div className="stepper">
@@ -133,6 +148,7 @@ export default function OptionSheet({ item, onClose, onAdd }) {
             {canAdd ? `${won(each * qty)} ${L('addToCart')}` : `${tr(missing[0].name)} ${L('selectSuffix')}`}
           </button>
         </div>
+        )}
       </div>
     </div>
   )

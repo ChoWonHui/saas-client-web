@@ -116,6 +116,23 @@ html:has(.kc) { scroll-behavior: smooth; }
 .kc-head.is-solid .kc-logo-mark { color: var(--kc-text); }
 .kc-head.is-solid .kc-logo-sub { color: var(--kc-text-3); }
 
+/* 제품(EXPRISM) 로고 자물쇠.
+   아이콘 + 워드마크 + 회사명 한 줄. 상단바 높이가 72px 이라 아이콘은 30px 로 잡는다. */
+.kc-logo-lockup { display: flex; align-items: center; gap: 11px; }
+.kc-logo-icon { width: auto; height: 32px; display: block; }
+.kc-logo-text { display: flex; flex-direction: column; gap: 3px; }
+/* 워드마크 두 벌(흰 글자·남색 글자)을 같은 자리에 겹쳐 두고 상단바 상태에 따라 갈아 끼운다.
+   따로 놓으면 상태가 바뀔 때 폭이 흔들린다. */
+.kc-logo-words { position: relative; display: block; height: 17px; }
+.kc-logo-word { display: block; width: auto; height: 17px; }
+.kc-logo-word-dark { position: absolute; left: 0; top: 0; opacity: 0; }
+.kc-head.is-solid .kc-logo-word-light { opacity: 0; }
+.kc-head.is-solid .kc-logo-word-dark { opacity: 1; }
+.kc-logo-word-light, .kc-logo-word-dark { transition: opacity .25s; }
+/* 드로어·푸터처럼 한 가지 바탕만 쓰는 곳은 한 벌만 놓는다. */
+.kc-logo-word-solo { height: 18px; width: auto; display: block; }
+.kc-foot-logo { height: 22px; width: auto; display: block; margin-bottom: 14px; }
+
 /* 창이 좁아져도 상단바 글자는 줄바꿈되지 않는다 — 좁아지면 줄바꿈이 아니라 햄버거로 전환한다. */
 .kc-nav { display: flex; align-items: center; gap: 30px; }
 .kc-nav > a { font-size: 15px; font-weight: 600; white-space: nowrap; color: rgba(255, 255, 255, .82); transition: color .14s; }
@@ -417,30 +434,95 @@ html:has(.kc) { scroll-behavior: smooth; }
 
 /* 히어로. 회사 사이트와 같은 좌우 분할이지만 오른쪽이 사진이 아니라 실제 앱 화면이라
    꽉 채우지 않고 여백 안에 세워 둔다. */
-.ex-hero { align-items: center; }
+/* 폰 화면 두 개(각 393px)가 들어가야 해서 오른쪽 칸을 회사 사이트 히어로보다 넓게 잡는다. */
+.ex-hero { align-items: center; grid-template-columns: 1fr 1.3fr; }
+/* 기본 히어로는 왼쪽 여백을 본문 격자(1200px)에 맞춰 화면이 넓을수록 키운다.
+   여기서는 오른쪽 칸이 이미 넓어서, 그대로 두면 1920px 에서 제목이 세 줄로 접혔다.
+   여백에 상한을 둬 글 칸을 지킨다. */
+.ex-hero .kc-hero-inner {
+  padding-left: clamp(24px, calc((100vw - var(--kc-wrap)) / 2 + 24px), 180px);
+}
+/* 위 두 줄은 미디어쿼리 밖이라, 좁은 화면에서 .kc-hero 를 1열로 돌리는 규칙보다
+   나중에 선언돼 그걸 덮어쓴다. 여기서 다시 1열로 되돌린다. */
+/* 좁은 화면 규칙은 이 파일 아래쪽, 기본 규칙 뒤에 모아 뒀다.
+   여기(기본 규칙 앞)에 두면 뒤에 오는 .ex-hero-shot / .ex-hero-frame 기본값이
+   미디어쿼리를 덮어써서 아무 일도 일어나지 않는다. */
+
 .ex-hero .kc-hero-inner { padding-bottom: 56px; }
 .ex-mark {
+  display: flex; align-items: center; gap: 9px;
   font-family: 'Hanken Grotesk', sans-serif; font-size: 13px; font-weight: 800;
   letter-spacing: .22em; color: #7dabff;
 }
+.ex-mark img { width: auto; height: 22px; display: block; }
+/* 짙은 히어로 오른쪽 위. 제목과 겹치지 않는 자리에만 두고, 읽는 데 방해되지 않게 아주 옅게 깐다. */
+.ex-hero-watermark {
+  position: absolute; top: calc(var(--kc-head-h) + 8px); right: -40px; z-index: 0;
+  width: auto; height: clamp(180px, 26vw, 340px);
+  opacity: .07; pointer-events: none;
+}
+/* 만든 회사 섹션의 제품 로고. 밝은 바탕이라 남색 워드마크를 쓴다. */
+.ex-maker-logo { height: 26px; width: auto; display: block; margin-top: 14px; }
 .ex-hero h1 { margin-top: 14px !important; }
 .ex-hero-shot {
   display: flex; align-items: center; justify-content: center;
-  padding: calc(var(--kc-head-h) + 32px) clamp(24px, 3vw, 56px) 48px 0;
+  gap: clamp(12px, 1.6vw, 22px);
+  padding: calc(var(--kc-head-h) + 32px) clamp(20px, 2.4vw, 40px) 48px 0;
 }
-.ex-hero-shot img,
-.ex-hero-shot video {
-  width: min(268px, 72%); height: auto; border-radius: 22px;
+/* 가게 화면과 사용 영상. 둘 다 폰 비율(300x554)로 같은 크기다.
+   폭은 칸을 나눠 갖고, 비율로 높이를 잡아 두 개가 항상 같은 크기로 선다. */
+.ex-hero-frame {
+  /* 비율은 iPhone 14/15/16 Pro(393x852)를 따르고, 실제 크기는 셋 중 가장 작은 값으로 정한다.
+       1) 393px            제 크기보다 크게 늘리지 않는다
+       2) 화면 높이에 맞춘 폭   852px 를 그대로 쓰면 세로가 화면을 넘어간다
+       3) 칸을 반씩 나눈 폭     두 개가 나란히 서야 한다
+     세로를 기준으로 폭을 정하고 높이는 비율이 따라오게 해야 위아래가 넘치지 않는다. */
+  flex: 0 1 auto; min-width: 0;
+  width: min(
+    393px,
+    (100svh - var(--kc-head-h) - 150px) * 393 / 852,
+    (100% - clamp(12px, 1.6vw, 22px)) / 2
+  );
+  aspect-ratio: 393 / 852; height: auto;
+  border: 0; border-radius: 22px; background: #000;
   box-shadow: 0 24px 60px rgb(0 0 0 / 45%);
   display: block;
 }
-/* 기본은 움직이는 캡쳐를 보여주고 정지본은 숨긴다. */
-.ex-hero-still { display: none; }
-/* 애니메이션을 꺼 달라고 설정한 사용자에게는 정지본으로 바꾼다.
-   GIF 는 재생을 멈출 방법이 없어 CSS 로 통째로 바꾸는 수밖에 없다. */
-@media (prefers-reduced-motion: reduce) {
-  .ex-hero-motion { display: none; }
-  .ex-hero-still { display: block; }
+
+@media (max-width: 900px) {
+  .ex-hero { grid-template-columns: 1fr; grid-template-rows: auto auto; }
+  /* .kc-hero 의 좁은 화면 규칙은 "사진 34svh + 글" 을 전제로 쓰였다.
+     이 화면은 사진 대신 실제 앱 화면이 아래에 오므로 그 전제를 되돌린다.
+     되돌리지 않으면 글 칸이 34svh 로 눌려 제목이 상단바 로고와 겹친다. */
+  .ex-hero .kc-hero-inner {
+    max-width: none; margin: 0;
+    padding: calc(var(--kc-head-h) + 24px) 24px 28px;
+  }
+  .ex-hero .kc-hero-lead { margin-top: 16px !important; }
+  .ex-hero .kc-hero-actions { margin-top: 24px; }
+
+  /* 화면 두 개를 나란히 세우면 폭이 반으로 줄어 글씨가 뭉갠다.
+     옆으로 넘겨 보는 띠로 바꾸고, 두 번째 카드가 살짝 보이게 해서 넘길 수 있음을 알린다. */
+  .ex-hero-shot {
+    display: flex; justify-content: flex-start; align-items: flex-start;
+    max-height: none; padding: 0 24px 32px; gap: 14px;
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    /* 스냅은 여백을 무시하고 카드를 칸 맨 끝에 붙인다.
+       이걸 안 주면 첫 카드가 왼쪽 여백을 먹고 화면 끝에 딱 붙어 시작한다. */
+    scroll-padding-left: 24px;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .ex-hero-shot::-webkit-scrollbar { display: none; }
+  /* 폭을 줄이더라도 <b>폰 비율은 반드시 지킨다</b>.
+     높이를 먼저 정해 납작한 상자에 넣었더니, 안쪽에서 도는 진짜 주문앱이
+     그 비율에 맞춰 다시 그려져 방 그림이 찌그러지고 화면이 이상해졌다.
+     비율만 지키면 안쪽 앱은 좁은 폰에서와 똑같이 그려진다. */
+  .ex-hero-frame {
+    flex: none; scroll-snap-align: start;
+    width: min(320px, 76vw); max-width: none;
+    aspect-ratio: 393 / 852; height: auto;
+    border-radius: 20px;
+  }
 }
 
 /* 손님 화면 세 장. 사진 아래에 글을 붙인 세로 묶음이라 뒤의 기능 목록과 리듬이 다르다. */
@@ -448,6 +530,12 @@ html:has(.kc) { scroll-behavior: smooth; }
 .ex-shot { border-radius: var(--kc-r); overflow: hidden; background: var(--kc-bg); border: 1px solid var(--kc-line); }
 .ex-shot img { width: 100%; height: auto; display: block; }
 .ex-shots h3 { margin-top: 20px !important; font-size: 19px; font-weight: 800; letter-spacing: -.02em; }
+/* 카드 번호. 옆으로 넘겨 보는 좁은 화면에서 순서를 잃지 않게 제목 앞에 붙인다. */
+.ex-shot-no {
+  margin-right: 9px;
+  font-family: 'Hanken Grotesk', sans-serif; font-size: 13px; font-weight: 800;
+  letter-spacing: .1em; color: var(--kc-accent);
+}
 .ex-shots p { margin-top: 9px !important; font-size: 15px; line-height: 1.8; color: var(--kc-text-2); }
 
 /* 사장님 화면도 휴대폰 캡쳐라 손님 화면과 같은 세로 묶음이다.
@@ -495,12 +583,62 @@ html:has(.kc) { scroll-behavior: smooth; }
   .ex-lang-shot { max-width: 320px; }
 }
 
+/* 좁은 화면 하단 고정 버튼. 기본은 감춰 두고 640px 이하에서만 띄운다. */
+.ex-dock { display: none; }
+
+/* ===== 좁은 화면(휴대폰) =====
+
+   이 화면은 휴대폰으로 보는 사람이 대부분이다. 넓은 화면 구성을 그대로 좁히면
+   폰 캡쳐 한 장이 화면 폭을 다 먹어 한 섹션이 3000px 을 넘었다.
+   세로로 무한정 쌓는 대신, 실제 화면은 옆으로 넘겨 보게 하고 나머지는 두 칸으로 접는다. */
 @media (max-width: 640px) {
-  /* 히어로 사진은 좁은 화면에서 글 위로 올라간다(.kc-hero 규칙). 높이를 줄여 글이 먼저 보이게 한다. */
-  .ex-hero .kc-hero-inner { padding-bottom: 40px; }
-  .ex-hero-shot { padding: 24px 24px 0; }
-  .ex-hero-shot img { width: min(200px, 56%); }
-  .ex-shots { grid-template-columns: 1fr; max-width: 340px; }
+  /* 버튼 두 개를 한 줄에 나눠 넣는다. */
+  .ex-hero .kc-hero-actions .kc-btn { flex: 1 1 0; justify-content: center; min-width: 0; }
+
+  /* 로고는 좁은 화면에서 한 단계 줄인다. 상단바에서 햄버거와 부딪히지 않게. */
+  .kc-logo-icon { height: 27px; }
+  .kc-logo-words, .kc-logo-word { height: 15px; }
+  .kc-logo-lockup { gap: 9px; }
+  /* 워터마크는 글과 겹치므로 더 옅게, 더 작게. */
+  .ex-hero-watermark { height: 150px; right: -24px; opacity: .05; }
+  .ex-maker-logo { height: 22px; }
+
+  /* 손님 화면 — 실제 화면을 작게 줄이면 볼 이유가 없어진다.
+     크기를 지키는 대신 옆으로 넘겨 보게 한다. */
+  /* 본문 격자 밖으로 흘려보내지 않는다. 음수 여백으로 화면 끝까지 붙이면
+     2px 이 삐져나와 페이지 전체에 가로 스크롤이 생겼다. */
+  .ex-shots {
+    display: flex; max-width: none;
+    gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+  }
+  .ex-shots::-webkit-scrollbar { display: none; }
+  .ex-shots > li { flex: none; scroll-snap-align: start; width: 66vw; max-width: 260px; }
+  .ex-shots h3 { margin-top: 14px !important; font-size: 17px; }
+  .ex-shots p { margin-top: 6px !important; font-size: 14px; line-height: 1.7; }
+
+  /* 사장님 화면 — 넉 장이라 두 칸으로 접으면 빈 칸 없이 두 줄로 떨어진다. */
+  .ex-shots-4 {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 22px 12px; overflow: visible;
+  }
+  .ex-shots-4 > li { width: auto; max-width: none; }
+  .ex-shots-4 h3 { font-size: 15.5px; }
+  .ex-shots-4 p { font-size: 13.5px; }
+
+  .ex-feat li { padding: 18px 2px; }
+  .ex-lang-shot { max-width: 260px; margin: 0 auto; }
+  .ex-maker-list li { padding: 15px 2px; }
+
+  /* 하단 고정 버튼 */
+  .ex-dock {
+    display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: rgb(255 255 255 / 92%); backdrop-filter: blur(10px);
+    border-top: 1px solid var(--kc-line);
+  }
+  .ex-dock .kc-btn { width: 100%; justify-content: center; }
+  /* 고정 버튼이 마지막 줄을 가리지 않게 바닥을 띄운다. */
+  .kc:has(.ex-dock) .kc-foot { padding-bottom: 96px; }
 }
 
 /* ===== 공통: 화면을 닫는 띠 ===== */

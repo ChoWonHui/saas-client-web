@@ -39,6 +39,48 @@ function isProductHost() {
  * 제품 도메인에서는 EXPRISM 이 주인공이고 KANCHENJUNGA 는 만든 회사로 물러난다.
  * 회사 도메인에서는 그 반대다.
  */
+/**
+ * 로고 파일. public/brand 에 있다.
+ *  - icon         : 정사각 아이콘(포크·숟가락이 들어간 입체 EXPRISM)
+ *  - wordmark     : 남색 글자 (밝은 바탕용)
+ *  - wordmarkLight: 흰 글자 (짙은 바탕용). 그라데이션이 들어간 E 는 원본 그대로 둔다.
+ */
+export const BRAND_LOGO = {
+  icon: '/brand/exprism-icon.png',
+  wordmark: '/brand/exprism-wordmark.png',
+  wordmarkLight: '/brand/exprism-wordmark-light.png',
+}
+
+/**
+ * 상단바 로고.
+ *
+ * exprism.co.kr 은 제품 사이트라 로고 그림을 쓴다. 상단바는 맨 위에서는 투명(짙은 배경),
+ * 내려가면 흰 배경으로 바뀌므로 워드마크를 두 벌 얹어 두고 CSS 로 갈아 끼운다.
+ * 색만 다른 같은 글자라 하나만 읽히면 되니, 보이지 않는 쪽은 alt 를 비운다.
+ */
+function BrandMark() {
+  if (!isProductHost()) {
+    return (
+      <>
+        <span className="kc-logo-mark">{brandMark().mark}</span>
+        <span className="kc-logo-sub">{brandMark().sub}</span>
+      </>
+    )
+  }
+  return (
+    <span className="kc-logo-lockup">
+      <img className="kc-logo-icon" src={BRAND_LOGO.icon} alt="" width="384" height="406" />
+      <span className="kc-logo-text">
+        <span className="kc-logo-words">
+          <img className="kc-logo-word kc-logo-word-light" src={BRAND_LOGO.wordmarkLight} alt="EXPRISM" width="556" height="96" />
+          <img className="kc-logo-word kc-logo-word-dark" src={BRAND_LOGO.wordmark} alt="" width="556" height="96" />
+        </span>
+        <span className="kc-logo-sub">BY {BRAND.name}</span>
+      </span>
+    </span>
+  )
+}
+
 function brandMark() {
   return isProductHost()
     ? { mark: 'EXPRISM', sub: `BY ${BRAND.name}` }
@@ -56,10 +98,11 @@ function brandMark() {
  */
 function useVisibleSection(items) {
   const [id, setId] = useState('')
-  const key = items.map((n) => n.to).join(',')
+  // 상위 메뉴(회사정보·사업영역)는 to 가 없고 children 만 있다. 그대로 to 를 읽으면 터진다.
+  const key = items.map((n) => n.to ?? '').join(',')
 
   useEffect(() => {
-    const ids = items.filter((n) => n.to.includes('#')).map((n) => n.to.split('#')[1])
+    const ids = items.filter((n) => n.to?.includes('#')).map((n) => n.to.split('#')[1])
     const els = ids.map((x) => document.getElementById(x)).filter(Boolean)
     if (!els.length) return undefined
 
@@ -88,7 +131,7 @@ function useVisibleSection(items) {
  * 활성 여부는 지금 보고 있는 구역으로 판단한다.
  */
 function NavItem({ to, label, visibleSection }) {
-  if (to.includes('#')) {
+  if (to?.includes('#')) {
     const anchor = to.split('#')[1]
     return (
       <a href={to} className={visibleSection === anchor ? 'on' : ''}>
@@ -158,8 +201,7 @@ function SiteHeader({ solid }) {
       <header className={`kc-head${isSolid ? ' is-solid' : ''}`}>
         <div className="kc-head-inner">
           <Link className="kc-logo" to="/" aria-label="홈으로">
-            <span className="kc-logo-mark">{brandMark().mark}</span>
-            <span className="kc-logo-sub">{brandMark().sub}</span>
+            <BrandMark />
           </Link>
 
           <nav className="kc-nav">
@@ -177,9 +219,7 @@ function SiteHeader({ solid }) {
                         /company/greeting·/company/org 에서도 활성으로 잡힌다.
                         그러면 하위 화면에 있어도 "회사소개"가 계속 눌린 것처럼 보인다. */}
                     {n.children.map((c) => (
-                      <NavLink key={c.to} to={c.to} end className={({ isActive }) => (isActive ? 'on' : '')}>
-                        {c.label}
-                      </NavLink>
+                      <NavChild key={c.to} to={c.to} label={c.label} />
                     ))}
                   </div>
                 </div>
@@ -205,7 +245,9 @@ function SiteHeader({ solid }) {
       <div className={`kc-drawer-back${open ? ' open' : ''}`} onClick={() => setOpen(false)} />
       <nav className={`kc-drawer${open ? ' open' : ''}`} aria-hidden={!open}>
         <div className="kc-drawer-head">
-          <span className="kc-logo-mark">{brandMark().mark}</span>
+          {isProductHost()
+            ? <img className="kc-logo-word kc-logo-word-solo" src={BRAND_LOGO.wordmark} alt="EXPRISM" width="556" height="96" />
+            : <span className="kc-logo-mark">{brandMark().mark}</span>}
           <button type="button" className="kc-drawer-x" aria-label="메뉴 닫기" onClick={() => setOpen(false)}>
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -224,8 +266,26 @@ function SiteHeader({ solid }) {
 }
 
 /** 지금 보고 있는 화면이 이 묶음에 속하는가. 상위 메뉴를 활성 표시하는 데 쓴다. */
+/**
+ * 드롭다운 안의 링크 하나.
+ * exprism.co.kr 의 "회사정보" 는 실제 화면이 kanchenjunga.co.kr 에 있어
+ * 절대 주소가 들어온다. NavLink 는 라우터 경로만 다루므로 그때는 평범한 a 로 내보낸다.
+ */
+function NavChild({ to, label }) {
+  if (/^https?:\/\//i.test(to)) {
+    return <a href={to}>{label}</a>
+  }
+  return (
+    <NavLink to={to} end className={({ isActive }) => (isActive ? 'on' : '')}>
+      {label}
+    </NavLink>
+  )
+}
+
 function isGroupActive(group, pathname) {
-  return group.children.some((c) => pathname === c.to || pathname.startsWith(`${c.to}/`))
+  return group.children.some(
+    (c) => !/^https?:\/\//i.test(c.to) && (pathname === c.to || pathname.startsWith(`${c.to}/`)),
+  )
 }
 
 /** 드로어의 상위 메뉴. 눌러서 자식을 접었다 편다.
@@ -255,9 +315,7 @@ function DrawerGroup({ item }) {
         <div>
           {/* 데스크톱 드롭다운과 같은 이유로 end 를 준다(접두사 매칭 방지). */}
           {item.children.map((c) => (
-            <NavLink key={c.to} to={c.to} end className={({ isActive }) => (isActive ? 'on' : '')}>
-              {c.label}
-            </NavLink>
+            <NavChild key={c.to} to={c.to} label={c.label} />
           ))}
         </div>
       </div>
@@ -271,6 +329,18 @@ function SiteFooter() {
       <div className="kc-wrap">
         <div className="kc-foot-grid">
           <div>
+            {/* 제품 도메인에서는 만든 회사(KANCHENJUNGA) 이름 위에 제품 로고를 세운다.
+                여기 적힌 주소·사업자번호는 회사 것이므로 회사 이름은 그대로 둔다. */}
+            {isProductHost() && (
+              <img
+                className="kc-foot-logo"
+                src={BRAND_LOGO.wordmarkLight}
+                alt="EXPRISM"
+                width="556"
+                height="96"
+                loading="lazy"
+              />
+            )}
             <h4>{BRAND.name}</h4>
             <p>
               {CONTACT.address}
@@ -278,8 +348,6 @@ function SiteFooter() {
               대표 {CONTACT.ceo}
               <br />
               사업자등록번호 {CONTACT.bizNo}
-              <br />
-              TEL: {CONTACT.phone}
               <br />
               {CONTACT.email}
             </p>
@@ -300,9 +368,6 @@ function SiteFooter() {
             <ul className="kc-foot-links">
               <li>
                 <a href={`mailto:${CONTACT.email}`}>이메일 문의</a>
-              </li>
-              <li>
-                <a href={`tel:${CONTACT.phone.replace(/-/g, '')}`}>전화 문의</a>
               </li>
               {/* 관리자 콘솔. 호스팅에 /admin 경로가 이미 있어 /mng 를 쓴다. */}
               <li>

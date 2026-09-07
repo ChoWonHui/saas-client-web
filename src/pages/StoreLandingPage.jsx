@@ -30,7 +30,8 @@ export default function StoreLandingPage() {
   const openMenu = async () => {
     try {
       const t = await shopApi.takeout(tenantCode)
-      if (t?.takeoutAvailable) { navigate(`/${tenantCode}/takeout`); return }
+      // orderEnabled 가 false 면 주문 자체가 없는 가게(FREE 요금제)라 포장 화면으로 보내지 않는다.
+      if (t?.takeoutAvailable && t?.orderEnabled !== false) { navigate(`/${tenantCode}/takeout`); return }
     } catch { /* 확인 실패해도 메뉴는 보여준다 */ }
     setView('menu')
   }

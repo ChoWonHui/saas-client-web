@@ -168,14 +168,10 @@ export default function ContactPage() {
         <div className="kc-wrap">
           {/* 2열 배치는 CSS 클래스로 준다 — 인라인 style 은 미디어쿼리가 못 이겨서
               좁은 화면에서도 2열로 남고, 그러면 이메일 주소 때문에 가로로 넘친다. */}
-          <div className="kc-info kc-info-pair">
+          <div className="kc-info">
             <div className="kc-info-card">
               <h3><span className="material-symbols-outlined">mail</span>이메일</h3>
               <p><a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a></p>
-            </div>
-            <div className="kc-info-card">
-              <h3><span className="material-symbols-outlined">call</span>대표 전화</h3>
-              <p><a href={`tel:${CONTACT.phone.replace(/-/g, '')}`}>{CONTACT.phone}</a></p>
             </div>
           </div>
         </div>

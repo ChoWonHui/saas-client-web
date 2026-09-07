@@ -61,8 +61,18 @@ export const NAV = [
  */
 export const NAV_EXPRISM = [
   { to: '/', label: '제품 소개' },
-  { to: '/#guest', label: '손님 화면' },
-  { to: '/#owner', label: '사장님 화면' },
+  // 손님 화면·사장님 화면은 제품 소개 안의 구역이라 헤더에서 뺐다.
+  // 본문에는 그대로 있고, 화면 안에서 훑어 내려가며 보게 한다.
+  {
+    // 이 도메인에서도 그대로 열린다. 같은 빌드라 라우트가 이미 있고,
+    // 다른 도메인으로 넘기면 보던 사이트를 벗어나게 되어 흐름이 끊긴다.
+    label: '회사정보',
+    children: [
+      { to: '/company', label: '회사소개' },
+      { to: '/company/greeting', label: '대표 인사말' },
+      { to: '/company/org', label: '조직도' },
+    ],
+  },
   { to: '/contact', label: '도입 문의' },
 ]
 

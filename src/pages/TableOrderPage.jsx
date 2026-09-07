@@ -37,6 +37,10 @@ export default function TableOrderPage({ mode = 'table' }) {
   const [infoOpen, setInfoOpen] = useState(false)
   const [ad, setAd] = useState(null)           // 본사 공통 광고(테이블 주문 화면에만 노출)
 
+  // 주문 가능 여부는 서버가 정한다(요금제). FREE 는 결제가 없어 메뉴판만 보여준다.
+  // 서버도 같은 값으로 주문 API 를 막으므로 화면만 숨기는 눈속임이 아니다.
+  const canOrder = shop?.orderEnabled !== false
+
   const sectionRefs = useRef({})
   const toastTimer = useRef(null)
 
@@ -92,11 +96,11 @@ export default function TableOrderPage({ mode = 'table' }) {
 
   // 메뉴가 열려 있는 동안 12초마다 진행 상태 갱신.
   useEffect(() => {
-    if (loading || fatal || stopped) return undefined
+    if (loading || fatal || stopped || !canOrder) return undefined
     loadMyOrders()
     const t = setInterval(loadMyOrders, 12000)
     return () => clearInterval(t)
-  }, [loading, fatal, stopped, loadMyOrders])
+  }, [loading, fatal, stopped, canOrder, loadMyOrders])
 
   // 가게 메인 페이지 콘텐츠(선택) — 실패해도 메뉴는 떠야 하므로 별도로 조용히 가져온다.
   useEffect(() => {
@@ -135,6 +139,8 @@ export default function TableOrderPage({ mode = 'table' }) {
   // 메뉴 담기 — 옵션이나 소개 영상이 있으면 상세 시트를 열고, 아니면 바로 담는다.
   function pickItem(item) {
     if (item.soldOut) return
+    // 메뉴판 전용이면 담지 않고 상세만 띄운다(사진·설명·영상·옵션 안내).
+    if (!canOrder) { setOptionItem(item); return }
     const hasDetail = (item.optionGroups || []).length > 0 || !!item.youtubeUrl
     if (hasDetail) { setOptionItem(item); return }
     addToCart({ item, options: [], qty: 1 })
@@ -195,9 +201,53 @@ export default function TableOrderPage({ mode = 'table' }) {
     }
   }
 
+  const catsRef = useRef(null)
+
+
+  /**
+   * 분류 탭을 누르면 그 분류로 이동한다.
+   *
+   * scrollIntoView({block:'start'}) 는 섹션을 화면 맨 위에 붙이는데,
+   * 그 자리는 분류 탭 바(.cats, sticky top:0)가 덮고 있어 제목이 가려졌다.
+   * 실제로 61px 짜리 바에 47px 가 잘렸다.
+   *
+   * 바 높이를 상수로 박으면 padding 이나 글자 크기가 바뀔 때 또 어긋난다.
+   * 누르는 시점에 직접 재서 그만큼 위로 올린다.
+   */
+  /**
+   * 화면 위쪽에 붙어 있는 것들이 실제로 덮는 높이.
+   *
+   * 처음에는 분류 탭 바(.cats, 61px)만 빼면 되는 줄 알았는데, 그 위에
+   * 가게 배너(.topbar, 132px, z-index 30)가 같은 top:0 으로 겹쳐 있다.
+   * 배너가 탭 바를 통째로 덮으므로 실제로 가려지는 높이는 132px 이고,
+   * 61px 만 빼면 나머지 71px 이 배너 뒤에 남는다.
+   *
+   * 요소를 지정해 두면 나중에 하나가 더 붙거나 높이가 바뀔 때 또 어긋난다.
+   * 상단에 고정된 것들을 훑어 가장 아래 끝을 찾는다.
+   */
+  function stickyOffset() {
+    let bottom = 0
+    document.querySelectorAll('*').forEach((el) => {
+      const cs = getComputedStyle(el)
+      if (cs.position !== 'sticky' && cs.position !== 'fixed') return
+      const r = el.getBoundingClientRect()
+      // 화면 맨 위에 붙어 있는 것만 센다. 하단 고정(장바구니 바)은 제외한다.
+      if (r.height > 0 && r.top <= 1 && r.bottom > bottom && r.bottom < window.innerHeight / 2) {
+        bottom = r.bottom
+      }
+    })
+    return bottom
+  }
+
   function scrollToCat(id) {
     setActiveCat(id)
-    sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    const el = sectionRefs.current[id]
+    if (!el) return
+    // 먼저 조금 내려 상단 요소들이 붙은 상태로 만든 뒤 높이를 잰다.
+    // 맨 위에서는 배너가 아직 흐름 안에 있어 값이 달라진다.
+    const offset = Math.max(stickyOffset(), 0)
+    const y = el.getBoundingClientRect().top + window.scrollY - offset - 8
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' })
   }
 
   // ── 화면 상태 분기 ──
@@ -262,7 +312,7 @@ export default function TableOrderPage({ mode = 'table' }) {
         <div className="topbar-right">
           {translating && <span className="lang-loading">{L('translating')}</span>}
           <LanguageSwitcher lang={lang} onChange={changeLang} />
-          {myOrders.length > 0 && (
+          {canOrder && myOrders.length > 0 && (
             <button className="myo-btn" onClick={() => setMyOpen(true)}>
               <Icon name="receipt_long" /> {L('myOrders')}
               <span className="myo-count">{myOrders.length}</span>
@@ -275,6 +325,13 @@ export default function TableOrderPage({ mode = 'table' }) {
         </div>
       </div>
 
+      {!canOrder && (
+        <div className="menuonly-bar">
+          <Icon name="menu_book" />
+          <span>{L('menuOnlyBar')}<br />{L('menuOnlyBar2')}</span>
+        </div>
+      )}
+
       {hasInfo && (
         <button className="shop-infobar" onClick={() => setInfoOpen(true)}>
           <Icon name="storefront" /> {shop?.shopName} · {L('infoView')} <Icon name="chevron_right" />
@@ -282,7 +339,7 @@ export default function TableOrderPage({ mode = 'table' }) {
       )}
 
       {categories.length > 1 && (
-        <div className="cats">
+        <div className="cats" ref={catsRef}>
           {categories.map((c) => (
             <button key={c.id} className={`cat${activeCat === c.id ? ' on' : ''}`} onClick={() => scrollToCat(c.id)}>
               {tr(c.name)}
@@ -291,7 +348,7 @@ export default function TableOrderPage({ mode = 'table' }) {
         </div>
       )}
 
-      <div className={`menu${totals.count > 0 ? ' with-cart' : ''}`}>
+      <div className={`menu${canOrder && totals.count > 0 ? ' with-cart' : ''}`}>
         {categories.length === 0 ? (
           <div className="empty">
             <Icon name="restaurant_menu" />
@@ -318,7 +375,7 @@ export default function TableOrderPage({ mode = 'table' }) {
                       <span className="item-price">{won(it.price)}</span>
                       {it.soldOut
                         ? <span className="badge-soldout">{L('soldOut')}</span>
-                        : <span className="item-add"><Icon name="add" /></span>}
+                        : canOrder && <span className="item-add"><Icon name="add" /></span>}
                     </div>
                   </div>
                 </button>
@@ -333,9 +390,10 @@ export default function TableOrderPage({ mode = 'table' }) {
             ? <a className="ld-ad tbl-ad" href={ad.link} target="_blank" rel="noopener noreferrer"><span className="ld-ad-tag">AD</span><img src={ad.imageUrl} alt={ad.text || '광고'} />{ad.text && <span className="ld-ad-text">{ad.text}</span>}</a>
             : <div className="ld-ad tbl-ad"><span className="ld-ad-tag">AD</span><img src={ad.imageUrl} alt={ad.text || '광고'} />{ad.text && <span className="ld-ad-text">{ad.text}</span>}</div>
         )}
+
       </div>
 
-      {totals.count > 0 && (
+      {canOrder && totals.count > 0 && (
         <div className="cartbar">
           <button className="cartbar-btn" onClick={() => setCartOpen(true)}>
             <span className="cartbar-left">
@@ -348,7 +406,7 @@ export default function TableOrderPage({ mode = 'table' }) {
       )}
 
       {optionItem && (
-        <OptionSheet item={optionItem} onClose={() => setOptionItem(null)} onAdd={addToCart} />
+        <OptionSheet item={optionItem} onClose={() => setOptionItem(null)} onAdd={addToCart} readOnly={!canOrder} />
       )}
       {cartOpen && (
         <CartSheet

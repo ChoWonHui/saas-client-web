@@ -88,14 +88,6 @@ function Location() {
             </div>
             <div className="kc-info-card">
               <h3>
-                <span className="material-symbols-outlined">call</span>대표 전화
-              </h3>
-              <p>
-                <a href={`tel:${CONTACT.phone.replace(/-/g, '')}`}>{CONTACT.phone}</a>
-              </p>
-            </div>
-            <div className="kc-info-card">
-              <h3>
                 <span className="material-symbols-outlined">mail</span>이메일
               </h3>
               <p>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import SiteShell, { SecHead } from '../../components/company/SiteShell'
+import SiteShell, { SecHead, BRAND_LOGO } from '../../components/company/SiteShell'
 import { BRAND, EXPRISM } from '../../company-data'
 
 /**
@@ -20,7 +20,24 @@ export default function ExprismPage() {
       <Languages />
       <Maker />
       <Closing />
+      <Dock />
     </SiteShell>
+  )
+}
+
+/*
+ * 좁은 화면에서만 보이는 하단 고정 버튼.
+ * 화면이 길어서 아래로 내려가면 문의로 가는 길이 사라진다. 전화번호는 이 도메인에서
+ * 쓰지 않기로 했으므로 버튼은 하나다.
+ */
+function Dock() {
+  return (
+    <div className="ex-dock">
+      <Link className="kc-btn kc-btn-primary" to="/contact">
+        도입 문의하기
+        <span className="material-symbols-outlined">arrow_forward</span>
+      </Link>
+    </div>
   )
 }
 
@@ -28,8 +45,15 @@ export default function ExprismPage() {
 function Hero() {
   return (
     <section className="kc-hero ex-hero">
+      {/* 짙은 히어로 오른쪽 위에 로고를 크게, 아주 옅게 깔아 둔다.
+          제목과 겹치지 않는 자리라 읽는 데 방해가 없고, 첫 화면에 제품의 얼굴이 남는다. */}
+      <img className="ex-hero-watermark" src={BRAND_LOGO.icon} alt="" width="384" height="406" aria-hidden="true" />
+
       <div className="kc-hero-inner">
-        <p className="ex-mark">{BRAND.name} 자사 솔루션</p>
+        <p className="ex-mark">
+          <img src={BRAND_LOGO.icon} alt="" width="384" height="406" />
+          {BRAND.name} 자사 솔루션
+        </p>
         <h1>
           테이블에 앉은 채로
           <br />
@@ -48,36 +72,30 @@ function Hero() {
       </div>
 
       {/*
-        움직이는 캡쳐. 실제 주문 화면을 위에서 아래로 훑은 것이라
-        메뉴가 어떻게 이어지는지 정지 사진보다 잘 보인다.
+        왼쪽은 실제로 돌아가는 가게 화면을 그대로 띄운다(같은 사이트라 프레임에 담긴다).
+        오른쪽은 사용 영상. 둘 다 폰 크기(300x554)로 맞춘다.
 
-        GIF 가 아니라 비디오다. 같은 움직임을 GIF 로 만들면 부드럽게 하는 데
-        1MB 가까이 들고 색도 뭉갠다(프레임마다 화면 전체를 담기 때문이다).
-        비디오는 절반 크기에 25fps 로 돌아간다.
-
-        poster 를 둬서 재생 전에도 첫 화면이 보이고, 비디오를 못 트는 환경과
-        애니메이션을 끄기로 설정한 사용자에게도 이 이미지가 남는다.
+        iframe 은 무겁다. loading="lazy" 를 쓰면 히어로가 비어 보이므로
+        가게 화면만 즉시 불러오고 영상은 늦게 불러온다.
       */}
       <div className="ex-hero-shot">
-        <video
-          className="ex-hero-motion"
-          src="/exprism/order-table.webm"
-          poster="/exprism/order-table.jpg"
+        <iframe
+          className="ex-hero-frame"
+          src="/M95YCUSTCP"
+          title="EXPRISM 으로 만든 가게 화면 예시"
           width="300"
           height="554"
-          autoPlay
-          loop
-          muted
-          playsInline
-          aria-label="테이블 QR 로 연 주문 화면을 위에서 아래로 훑는 모습. 가게 이름과 자리 번호, 메뉴 목록이 차례로 보인다."
         />
-        <img
-          className="ex-hero-still"
-          src="/exprism/order-table.jpg"
-          alt="테이블 QR 로 연 주문 화면. 가게 이름과 자리 번호, 메뉴 목록이 보인다."
-          width="640"
-          height="1385"
-          decoding="async"
+        <iframe
+          className="ex-hero-frame"
+          src="https://www.youtube.com/embed/qW4AT9z3D08?autoplay=1&mute=1&loop=1&playlist=qW4AT9z3D08&controls=0&playsinline=1&rel=0"
+          title="EXPRISM 사용 영상"
+          width="300"
+          height="554"
+          loading="lazy"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
         />
       </div>
     </section>
@@ -94,12 +112,12 @@ function Guest() {
           desc="테이블의 QR 을 찍으면 바로 메뉴가 열립니다. 회원가입도, 로그인도 없습니다."
         />
         <ul className="ex-shots">
-          {EXPRISM.guest.map((g) => (
+          {EXPRISM.guest.map((g, i) => (
             <li key={g.img}>
               <div className="ex-shot">
                 <img src={g.img} alt={g.alt} width="640" height="1385" loading="lazy" decoding="async" />
               </div>
-              <h3>{g.title}</h3>
+              <h3><span className="ex-shot-no">{String(i + 1).padStart(2, '0')}</span>{g.title}</h3>
               <p>{g.desc}</p>
             </li>
           ))}
@@ -192,6 +210,7 @@ function Maker() {
       <div className="kc-wrap ex-maker">
         <div>
           <p className="ex-mark ex-mark-dark">MADE BY</p>
+          <img className="ex-maker-logo" src={BRAND_LOGO.wordmark} alt="EXPRISM" width="556" height="96" loading="lazy" />
           <h2>{BRAND.name} 가 만들고 운영합니다</h2>
           <p className="ex-maker-desc">
             {BRAND.name} 는 홈페이지 제작부터 이미 쓰고 계신 시스템의 유지보수까지 맡는 IT 서비스 회사입니다.

@@ -53,6 +53,11 @@ const UI = {
   menuOpenFailSub:{ ko: 'QR 코드를 다시 스캔하거나 직원에게 문의해 주세요.', en: 'Please rescan the QR code or ask a staff member.', ja: 'QRコードを再スキャンするか、スタッフにお尋ねください。', zh: '请重新扫描二维码或询问店员。', es: 'Vuelva a escanear el código QR o pregunte al personal.' },
   takeoutStopTitle:{ ko: '현재 포장 주문이 정지되었어요', en: 'Takeout orders are paused', ja: '現在テイクアウト注文は停止中です', zh: '当前暂停外带订单', es: 'Los pedidos para llevar están pausados' },
   takeoutStopSub:{ ko: '지금은 포장 주문을 받지 않습니다. 매장에 문의하거나 잠시 후 다시 시도해 주세요.', en: 'Takeout is not available now. Please ask the store or try again later.', ja: '現在テイクアウトを受け付けていません。店舗にお問い合わせいただくか、しばらくしてからお試しください。', zh: '目前不接受外带订单。请咨询门店或稍后再试。', es: 'Ahora no se aceptan pedidos para llevar. Consulte en la tienda o inténtelo más tarde.' },
+  // 메뉴판 전용(FREE 요금제) — 주문 기능 없이 메뉴만 보여준다.
+  // 좁은 화면에서 한 줄로 흐르면 읽기 나쁘다. 두 문장을 나눠 두고 화면에서 줄을 바꾼다.
+  menuOnlyBar:   { ko: '메뉴판만 보실 수 있어요.', en: 'Menu only.', ja: 'メニューのみご覧いただけます。', zh: '仅供浏览菜单。', es: 'Solo carta.' },
+  menuOnlyBar2:  { ko: '주문은 직원에게 말씀해 주세요.', en: 'Please order with a staff member.', ja: 'ご注文はスタッフにお申し付けください。', zh: '点单请告知店员。', es: 'Haga su pedido con el personal.' },
+  menuOnlyClose: { ko: '닫기',        en: 'Close',       ja: '閉じる',       zh: '关闭',       es: 'Cerrar' },
   payDone:       { ko: '결제가 완료되었어요', en: 'Payment complete', ja: 'お支払いが完了しました', zh: '支付完成', es: 'Pago completado' },
   payDoneSub:    { ko: '주문이 접수되어 곧 조리를 시작합니다.', en: 'Your order is received and cooking will begin soon.', ja: 'ご注文を受け付けました。まもなく調理を始めます。', zh: '订单已接收，即将开始烹饪。', es: 'Tu pedido fue recibido y pronto comenzará a prepararse.' },
   payDoneTakeout:{ ko: '포장으로 준비되면 알려드릴게요.', en: "We'll let you know when your takeout is ready.", ja: 'テイクアウトの準備ができたらお知らせします。', zh: '外带准备好后会通知您。', es: 'Te avisaremos cuando tu pedido para llevar esté listo.' },
