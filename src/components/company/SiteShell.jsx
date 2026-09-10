@@ -29,7 +29,8 @@ export default function SiteShell({ children, solidHeader = false, title }) {
  * exprism.co.kr 은 제품 홍보 전용이다. 회사 메뉴(회사정보·디자인 시안 등)를 띄우지 않고
  * 제품 안에서만 움직이게 한다. 회사 소개가 필요하면 kanchenjunga.co.kr 로 보낸다.
  */
-function isProductHost() {
+/** 지금 보고 있는 주소가 제품 사이트(exprism.co.kr)인가. 화면 문구와 항목이 여기서 갈린다. */
+export function isProductHost() {
   if (typeof window === 'undefined') return false
   return /(^|\.)exprism\.co\.kr$/i.test(window.location.hostname)
 }
@@ -40,15 +41,23 @@ function isProductHost() {
  * 회사 도메인에서는 그 반대다.
  */
 /**
- * 로고 파일. public/brand 에 있다.
+ * 로고 파일. <b>이미지 서버(S3 + CloudFront)</b>에 있다.
+ *
+ * 앱과 함께 배포되는 정적 파일로 두지 않는다. 이미지는 이미지 서버가 맡는다는 게 이 프로젝트의 규칙이고,
+ * 그래야 로고를 바꿀 때 앱을 다시 배포하지 않아도 되고 CDN 이 대신 실어 나른다.
+ * 올리는 곳은 나머지 업로드 이미지와 같은 버킷·같은 접두 경로(saas-admin/)다.
+ *
  *  - icon         : 정사각 아이콘(포크·숟가락이 들어간 입체 EXPRISM)
  *  - wordmark     : 남색 글자 (밝은 바탕용)
  *  - wordmarkLight: 흰 글자 (짙은 바탕용). 그라데이션이 들어간 E 는 원본 그대로 둔다.
  */
+const CDN = 'https://d2ziky4ycezd5d.cloudfront.net/saas-admin/brand'
 export const BRAND_LOGO = {
-  icon: '/brand/exprism-icon.png',
-  wordmark: '/brand/exprism-wordmark.png',
-  wordmarkLight: '/brand/exprism-wordmark-light.png',
+  icon: `${CDN}/exprism-icon-v2.png`,
+  wordmark: `${CDN}/exprism-wordmark-v2.png`,
+  wordmarkLight: `${CDN}/exprism-wordmark-light-v2.png`,
+  favicon: `${CDN}/exprism-icon-128-v2.png`,
+  og: `${CDN}/exprism-og-v2.jpg`,
 }
 
 /**

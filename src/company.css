@@ -90,6 +90,21 @@ html:has(.kc) { scroll-behavior: smooth; }
 .kc-btn-line { border-color: var(--kc-line); background: var(--kc-surface); color: var(--kc-text); }
 .kc-btn-line:hover { border-color: var(--kc-accent); color: var(--kc-accent); }
 
+/* EXPRISM 화면의 주 버튼은 로고와 같은 보라에서 파랑으로 넘어가는 색을 쓴다.
+   회사 사이트(kanchenjunga.co.kr)는 그대로 단색이므로 여기서만 덮어쓴다. */
+.ex-hero .kc-btn-primary, .ex-dock .kc-btn-primary {
+  background: linear-gradient(112deg, #7c3aed 0%, #4f46e5 46%, #2563eb 100%);
+  box-shadow: 0 10px 26px rgb(79 70 229 / 42%);
+}
+.ex-hero .kc-btn-primary:hover, .ex-dock .kc-btn-primary:hover {
+  background: linear-gradient(112deg, #6d28d9 0%, #4338ca 46%, #1d4ed8 100%);
+}
+/* 짙은 바탕의 보조 버튼. 테두리만 있으면 비어 보여서 옅은 면을 깐다. */
+.ex-hero .kc-btn-ghost {
+  background: rgb(255 255 255 / 8%); border-color: rgb(255 255 255 / 30%);
+}
+.ex-hero .kc-btn-ghost:hover { background: rgb(255 255 255 / 16%); border-color: rgb(255 255 255 / 60%); }
+
 /* ===== 헤더 ===== */
 
 /* 헤더 배경 전환을 판단하는 감지용 요소. 보이지 않고 자리도 차지하지 않는다.
@@ -278,6 +293,9 @@ html:has(.kc) { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   .kc-reveal { opacity: 1; transform: none; transition: none; }
   .kc-caret { animation: none; }
+  /* 움직임을 줄이겠다고 설정했으면 미끄러지지 않고 그냥 나타난다. */
+  .ex-dock { transition: opacity .2s ease; }
+  .ex-dock:not(.is-up) { transform: none; }
 }
 /* 회사명. 글꼴과 자간으로 구분하고 색은 흰색 그대로 둔다.
    예전에는 파란 그라데이션을 입혔는데, 큰 제목에 건 그라데이션은 대비를 깎아먹고
@@ -450,20 +468,18 @@ html:has(.kc) { scroll-behavior: smooth; }
 
 .ex-hero .kc-hero-inner { padding-bottom: 56px; }
 .ex-mark {
-  display: flex; align-items: center; gap: 9px;
   font-family: 'Hanken Grotesk', sans-serif; font-size: 13px; font-weight: 800;
   letter-spacing: .22em; color: #7dabff;
 }
-.ex-mark img { width: auto; height: 22px; display: block; }
-/* 짙은 히어로 오른쪽 위. 제목과 겹치지 않는 자리에만 두고, 읽는 데 방해되지 않게 아주 옅게 깐다. */
-.ex-hero-watermark {
-  position: absolute; top: calc(var(--kc-head-h) + 8px); right: -40px; z-index: 0;
-  width: auto; height: clamp(180px, 26vw, 340px);
-  opacity: .07; pointer-events: none;
+/* 히어로의 제품 로고. 제목 위에 제 크기로 선다.
+   예전에는 배경에 7% 로 깔아 뒀는데, 그러면 로고가 있는지도 모른다.
+   짙은 바탕이라 아이콘의 보라·파랑이 그대로 살아난다. */
+.ex-hero-logo {
+  display: block; width: auto; height: 120px;
+  margin-bottom: 22px;
+  filter: drop-shadow(0 14px 34px rgb(99 102 241 / 38%));
 }
-/* 만든 회사 섹션의 제품 로고. 밝은 바탕이라 남색 워드마크를 쓴다. */
-.ex-maker-logo { height: 26px; width: auto; display: block; margin-top: 14px; }
-.ex-hero h1 { margin-top: 14px !important; }
+.ex-hero h1 { margin-top: 12px !important; }
 .ex-hero-shot {
   display: flex; align-items: center; justify-content: center;
   gap: clamp(12px, 1.6vw, 22px);
@@ -499,7 +515,16 @@ html:has(.kc) { scroll-behavior: smooth; }
     padding: calc(var(--kc-head-h) + 24px) 24px 28px;
   }
   .ex-hero .kc-hero-lead { margin-top: 16px !important; }
-  .ex-hero .kc-hero-actions { margin-top: 24px; }
+  /* 좌우 분할이 풀려 글이 화면 폭을 다 쓰는 만큼, 버튼도 폭을 다 쓰는 편이 보기 좋다.
+     640px 이하에서만 세로로 쌓던 것을 900px 이하로 넓힌다. */
+  .ex-hero .kc-hero-actions {
+    margin-top: 24px; flex-direction: column; align-items: stretch; gap: 10px;
+  }
+  .ex-hero .kc-hero-actions .kc-btn {
+    flex: none; width: 100%; justify-content: center;
+    height: auto; min-height: 58px; font-size: 16.5px; letter-spacing: -.01em;
+  }
+  .ex-hero .kc-hero-actions .kc-btn .material-symbols-outlined { font-size: 22px; }
 
   /* 화면 두 개를 나란히 세우면 폭이 반으로 줄어 글씨가 뭉갠다.
      옆으로 넘겨 보는 띠로 바꾸고, 두 번째 카드가 살짝 보이게 해서 넘길 수 있음을 알린다. */
@@ -523,6 +548,19 @@ html:has(.kc) { scroll-behavior: smooth; }
     aspect-ratio: 393 / 852; height: auto;
     border-radius: 20px;
   }
+}
+
+/* 히어로 안, 버튼 바로 위의 선언.
+   제목만큼 크면 두 개가 싸우므로 제목보다 한 단계 작게 두되, 설명글보다는 굵고 밝게 해서
+   "제목 - 선언 - 버튼" 이 계단으로 읽히게 한다. */
+.ex-stmt-line {
+  margin-top: 22px !important; max-width: 22ch;
+  font-size: clamp(18px, 1.65vw, 23px); font-weight: 700; line-height: 1.5; letter-spacing: -.028em;
+  color: #fff;
+}
+.ex-stmt-sub {
+  margin-top: 12px !important; max-width: 46ch;
+  font-size: clamp(14.5px, 1.2vw, 16.5px); line-height: 1.8; color: rgb(226 235 250 / 74%);
 }
 
 /* 손님 화면 세 장. 사진 아래에 글을 붙인 세로 묶음이라 뒤의 기능 목록과 리듬이 다르다. */
@@ -592,16 +630,19 @@ html:has(.kc) { scroll-behavior: smooth; }
    폰 캡쳐 한 장이 화면 폭을 다 먹어 한 섹션이 3000px 을 넘었다.
    세로로 무한정 쌓는 대신, 실제 화면은 옆으로 넘겨 보게 하고 나머지는 두 칸으로 접는다. */
 @media (max-width: 640px) {
-  /* 버튼 두 개를 한 줄에 나눠 넣는다. */
-  .ex-hero .kc-hero-actions .kc-btn { flex: 1 1 0; justify-content: center; min-width: 0; }
+  /* 히어로 버튼 규칙은 900px 이하 블록에 모아 뒀다.
+     예전에 한 줄에 나눠 넣으려고 flex:1 1 0 을 줬다가, 세로 배치에서는 flex-basis 0 이
+     <b>높이</b>에 걸려 버튼이 글자 높이(26px)까지 눌린 적이 있다. 다시 넣지 말 것. */
 
   /* 로고는 좁은 화면에서 한 단계 줄인다. 상단바에서 햄버거와 부딪히지 않게. */
   .kc-logo-icon { height: 27px; }
   .kc-logo-words, .kc-logo-word { height: 15px; }
   .kc-logo-lockup { gap: 9px; }
-  /* 워터마크는 글과 겹치므로 더 옅게, 더 작게. */
-  .ex-hero-watermark { height: 150px; right: -24px; opacity: .05; }
-  .ex-maker-logo { height: 22px; }
+  /* 로고 크기는 화면 폭과 상관없이 120px 로 고정이다(요청).
+     그만큼 위쪽이 무거워지므로 글 사이 여백을 조여 첫 화면 안에 버튼까지 넣는다. */
+  .ex-hero-logo { margin-bottom: 14px; }
+  .ex-stmt-line { margin-top: 16px !important; max-width: none; }
+  .ex-stmt-sub { margin-top: 10px !important; max-width: none; }
 
   /* 손님 화면 — 실제 화면을 작게 줄이면 볼 이유가 없어진다.
      크기를 지키는 대신 옆으로 넘겨 보게 한다. */
@@ -629,14 +670,19 @@ html:has(.kc) { scroll-behavior: smooth; }
   .ex-lang-shot { max-width: 260px; margin: 0 auto; }
   .ex-maker-list li { padding: 15px 2px; }
 
-  /* 하단 고정 버튼 */
+  /* 하단 고정 버튼.
+     히어로의 문의 버튼이 보이는 동안에는 화면 밖에 내려가 있다가,
+     그 버튼이 위로 지나가면 미끄러져 올라온다(ExprismPage 의 Dock 참조). */
   .ex-dock {
     display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
     padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
     background: rgb(255 255 255 / 92%); backdrop-filter: blur(10px);
     border-top: 1px solid var(--kc-line);
+    transform: translateY(110%); opacity: 0; pointer-events: none;
+    transition: transform .38s cubic-bezier(.22, .61, .36, 1), opacity .28s ease;
   }
-  .ex-dock .kc-btn { width: 100%; justify-content: center; }
+  .ex-dock.is-up { transform: none; opacity: 1; pointer-events: auto; }
+  .ex-dock .kc-btn { width: 100%; justify-content: center; height: auto; min-height: 56px; font-size: 16.5px; }
   /* 고정 버튼이 마지막 줄을 가리지 않게 바닥을 띄운다. */
   .kc:has(.ex-dock) .kc-foot { padding-bottom: 96px; }
 }
@@ -943,6 +989,18 @@ html:has(.kc) { scroll-behavior: smooth; }
 /* 이메일 아이디 + @도메인. 가운데 @ 는 입력칸이 아니라 구분 기호다. */
 .kc-email { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
 .kc-email-at { font-size: 15px; color: var(--kc-text-3); }
+/* 문의 폼 안의 고르는 칩(관심 기능). 화면에 늘어놓는 기존 .kc-chip 은 가운데 정렬에
+   그림자가 있는 표시용이라, 폼 안에서는 왼쪽 축에 맞추고 누를 수 있게 바꾼다. */
+.kc-form .kc-chips { justify-content: flex-start; gap: 10px; margin-top: 8px; }
+.kc-form .kc-chip {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  padding: 10px 16px; box-shadow: none; font-size: 14.5px;
+  transition: border-color .14s, color .14s, background-color .14s;
+}
+.kc-form .kc-chip input { width: 16px; height: 16px; margin: 0; accent-color: var(--kc-accent); }
+.kc-form .kc-chip:hover { border-color: var(--kc-accent); }
+.kc-form .kc-chip.on { border-color: var(--kc-accent); color: var(--kc-accent); background: rgb(47 111 235 / 7%); }
+
 .kc-check { display: flex; align-items: flex-start; gap: 9px; font-size: 14.5px; color: var(--kc-text-2); cursor: pointer; }
 .kc-check input { margin-top: 3px; width: 17px; height: 17px; accent-color: var(--kc-accent); flex: none; }
 .kc-form-actions { display: flex; }

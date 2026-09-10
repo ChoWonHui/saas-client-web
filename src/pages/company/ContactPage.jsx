@@ -1,22 +1,31 @@
 import { useState } from 'react'
-import SiteShell, { SubHead, SecHead } from '../../components/company/SiteShell'
-import { CONTACT, EMAIL_DOMAINS } from '../../company-data'
+import SiteShell, { SubHead, SecHead, isProductHost } from '../../components/company/SiteShell'
+import { CONTACT, EMAIL_DOMAINS, EXPRISM_LEAD } from '../../company-data'
 
 const DIRECT = '__direct__'
 
 /**
  * 문의(/contact). 원본 kanchenjunga-nodejs/public/contact.html 을 옮긴 것이다.
  *
- * 원본은 /api-proxy/home/send-email 로 POST 한다. 그 백엔드가 없으면 전송이 실패하는데,
- * 실패한 채로 두면 사용자는 보낸 줄 알고 답을 기다린다. 그래서:
+ * 한 경로가 두 가지 문의를 받는다.
+ *   - kanchenjunga.co.kr : 프로젝트 문의 (제목 + 내용)
+ *   - exprism.co.kr      : EXPRISM 도입 문의 (매장 정보)
+ * 가게 사장님에게 "문의 제목" 을 지어 달라고 하면 아무도 제대로 못 쓴다.
+ * 대신 우리가 안내에 필요한 것(매장명·규모·시기·관심 기능)을 항목으로 묻는다.
+ *
+ * 보내는 방식은 두 경우가 같다.
  *   1) 먼저 API 로 보낸다 (백엔드가 붙어 있으면 그대로 동작한다)
  *   2) 실패하면 이유를 밝히고, 같은 내용을 담은 메일 앱 링크를 준다
  * 어느 쪽이든 문의가 우리에게 도달하는 길이 남는다.
  */
 export default function ContactPage() {
+  const lead = isProductHost()
+
   const [form, setForm] = useState({
     name: '', phone: '', emailId: '', emailDomain: EMAIL_DOMAINS[0], emailCustom: '',
     subject: '', message: '', privacy: false,
+    // 도입 문의 전용
+    store: '', size: '', timing: '', interests: [],
   })
   const [state, setState] = useState({ sending: false, error: '', done: false, mailto: '' })
 
@@ -25,25 +34,51 @@ export default function ContactPage() {
     setForm((f) => ({ ...f, [k]: v }))
   }
 
+  const toggleInterest = (label) => setForm((f) => ({
+    ...f,
+    interests: f.interests.includes(label)
+      ? f.interests.filter((x) => x !== label)
+      : [...f.interests, label],
+  }))
+
   const email =
     form.emailDomain === DIRECT ? `${form.emailId}@${form.emailCustom}` : `${form.emailId}${form.emailDomain}`
 
+  /** 도입 문의는 제목을 받지 않으므로 매장명으로 만든다. */
+  const subject = lead ? `[EXPRISM 도입 문의] ${form.store}`.trim() : form.subject
+
+  /** 메일 본문. 폼에 적은 것이 하나도 빠지지 않게 여기서 한 번에 엮는다. */
+  function buildBody() {
+    const rows = lead
+      ? [
+        `매장명: ${form.store}`,
+        `담당자: ${form.name}`,
+        `연락처: ${form.phone}`,
+        `이메일: ${email}`,
+        `매장 규모: ${form.size || '-'}`,
+        `도입 희망 시기: ${form.timing || '-'}`,
+        `관심 기능: ${form.interests.length ? form.interests.join(', ') : '-'}`,
+      ]
+      : [
+        `이름: ${form.name}`,
+        `연락처: ${form.phone || '-'}`,
+        `이메일: ${email}`,
+      ]
+    return [...rows, '', form.message || ''].join('\n')
+  }
+
   function buildMailto() {
-    const body = [
-      `이름: ${form.name}`,
-      `연락처: ${form.phone || '-'}`,
-      `이메일: ${email}`,
-      '',
-      form.message,
-    ].join('\n')
-    return `mailto:${CONTACT.email}?subject=${encodeURIComponent(form.subject)}&body=${encodeURIComponent(body)}`
+    return `mailto:${CONTACT.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildBody())}`
   }
 
   async function onSubmit(e) {
     e.preventDefault()
     setState({ sending: true, error: '', done: false, mailto: '' })
 
-    const payload = { name: form.name, phone: form.phone, email, subject: form.subject, message: form.message }
+    const payload = {
+      name: form.name, phone: form.phone, email, subject, message: buildBody(),
+      ...(lead ? { store: form.store, size: form.size, timing: form.timing, interests: form.interests } : {}),
+    }
 
     try {
       const res = await fetch('/api-proxy/home/send-email', {
@@ -59,7 +94,7 @@ export default function ContactPage() {
         throw new Error(msg)
       }
       setState({ sending: false, error: '', done: true, mailto: '' })
-      setForm((f) => ({ ...f, subject: '', message: '', privacy: false }))
+      setForm((f) => ({ ...f, subject: '', message: '', privacy: false, interests: [] }))
     } catch (err) {
       // 네트워크 자체가 실패한 경우(백엔드 미연결) 포함.
       setState({
@@ -71,26 +106,44 @@ export default function ContactPage() {
     }
   }
 
+  const pageTitle = lead ? '도입 문의' : '문의하기'
+
   return (
-    <SiteShell solidHeader title="문의하기">
-      <SubHead title="문의하기" />
+    <SiteShell solidHeader title={pageTitle}>
+      <SubHead title={pageTitle} />
 
       <section className="kc-sec">
         <div className="kc-wrap">
           <SecHead
-            title="프로젝트 문의"
-            desc="궁금하신 내용을 남겨주시면 각 분야의 담당자가 확인 후 성심껏 답변드립니다."
+            title={lead ? 'EXPRISM 도입 문의' : '프로젝트 문의'}
+            desc={lead
+              ? '매장 사정을 남겨주시면 담당자가 확인 후 연락드립니다. 규모와 메뉴 구성에 맞춰 안내드립니다.'
+              : '궁금하신 내용을 남겨주시면 각 분야의 담당자가 확인 후 성심껏 답변드립니다.'}
           />
 
           <form className="kc-form" onSubmit={onSubmit} noValidate={false}>
+            {lead && (
+              <label className="kc-field">
+                <span>매장명<span className="kc-req">*</span></span>
+                <input
+                  type="text" placeholder="맛있는식당" required
+                  value={form.store} onChange={set('store')}
+                />
+              </label>
+            )}
+
             <div className="kc-row">
               <label className="kc-field">
-                <span>이름<span className="kc-req">*</span></span>
+                <span>{lead ? '담당자 이름' : '이름'}<span className="kc-req">*</span></span>
                 <input type="text" placeholder="홍길동" required value={form.name} onChange={set('name')} />
               </label>
               <label className="kc-field">
-                <span>연락처 (선택)</span>
-                <input type="tel" placeholder="010-1234-5678" value={form.phone} onChange={set('phone')} />
+                {/* 도입 문의는 전화로 안내하는 편이 빠르므로 연락처를 필수로 받는다. */}
+                <span>연락처{lead ? <span className="kc-req">*</span> : ' (선택)'}</span>
+                <input
+                  type="tel" placeholder="010-1234-5678" required={lead}
+                  value={form.phone} onChange={set('phone')}
+                />
               </label>
             </div>
 
@@ -118,18 +171,58 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <label className="kc-field">
-              <span>문의 제목<span className="kc-req">*</span></span>
-              <input
-                type="text" placeholder="문의 제목을 입력해주세요." required
-                value={form.subject} onChange={set('subject')}
-              />
-            </label>
+            {lead ? (
+              <>
+                <div className="kc-row">
+                  <label className="kc-field">
+                    <span>매장 규모</span>
+                    <select value={form.size} onChange={set('size')}>
+                      <option value="">선택해주세요</option>
+                      {EXPRISM_LEAD.sizes.map((v) => <option key={v} value={v}>{v}</option>)}
+                    </select>
+                  </label>
+                  <label className="kc-field">
+                    <span>도입 희망 시기</span>
+                    <select value={form.timing} onChange={set('timing')}>
+                      <option value="">선택해주세요</option>
+                      {EXPRISM_LEAD.timings.map((v) => <option key={v} value={v}>{v}</option>)}
+                    </select>
+                  </label>
+                </div>
+
+                <div className="kc-field">
+                  <span>관심 있는 기능 (여러 개 고를 수 있습니다)</span>
+                  <div className="kc-chips">
+                    {EXPRISM_LEAD.interests.map((v) => (
+                      <label key={v} className={`kc-chip${form.interests.includes(v) ? ' on' : ''}`}>
+                        <input
+                          type="checkbox"
+                          checked={form.interests.includes(v)}
+                          onChange={() => toggleInterest(v)}
+                        />
+                        {v}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <label className="kc-field">
+                <span>문의 제목<span className="kc-req">*</span></span>
+                <input
+                  type="text" placeholder="문의 제목을 입력해주세요." required
+                  value={form.subject} onChange={set('subject')}
+                />
+              </label>
+            )}
 
             <label className="kc-field">
-              <span>문의 내용<span className="kc-req">*</span></span>
+              <span>문의 내용{lead ? ' (선택)' : <span className="kc-req">*</span>}</span>
               <textarea
-                placeholder="문의하실 내용을 자세하게 작성해주세요." required
+                placeholder={lead
+                  ? '메뉴 수, 포장 주문 여부, 지금 쓰고 계신 방식 등 알려주시면 더 정확히 안내드립니다.'
+                  : '문의하실 내용을 자세하게 작성해주세요.'}
+                required={!lead}
                 value={form.message} onChange={set('message')}
               />
             </label>
@@ -156,7 +249,7 @@ export default function ContactPage() {
 
             <div className="kc-form-actions">
               <button type="submit" className="kc-btn kc-btn-primary" disabled={state.sending}>
-                {state.sending ? '보내는 중…' : '문의 보내기'}
+                {state.sending ? '보내는 중…' : (lead ? '도입 문의 보내기' : '문의 보내기')}
                 {!state.sending && <span className="material-symbols-outlined">send</span>}
               </button>
             </div>

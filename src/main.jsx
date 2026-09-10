@@ -23,9 +23,10 @@ function applyBrandHead() {
     Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v))
   }
 
-  set('link[rel="icon"]', { rel: 'icon', type: 'image/png', href: '/brand/exprism-icon-128.png' })
-  set('link[rel="apple-touch-icon"]', { rel: 'apple-touch-icon', href: '/brand/exprism-icon-128.png' })
-  set('meta[property="og:image"]', { property: 'og:image', content: 'https://www.exprism.co.kr/brand/exprism-og.jpg' }, 'meta')
+  const cdn = 'https://d2ziky4ycezd5d.cloudfront.net/saas-admin/brand'
+  set('link[rel="icon"]', { rel: 'icon', type: 'image/png', href: `${cdn}/exprism-icon-128-v2.png` })
+  set('link[rel="apple-touch-icon"]', { rel: 'apple-touch-icon', href: `${cdn}/exprism-icon-128-v2.png` })
+  set('meta[property="og:image"]', { property: 'og:image', content: `${cdn}/exprism-og-v2.jpg` }, 'meta')
   set('meta[property="og:site_name"]', { property: 'og:site_name', content: 'EXPRISM' }, 'meta')
 }
 

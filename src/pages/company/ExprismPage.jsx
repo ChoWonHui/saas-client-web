@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SiteShell, { SecHead, BRAND_LOGO } from '../../components/company/SiteShell'
 import { BRAND, EXPRISM } from '../../company-data'
@@ -12,28 +13,42 @@ import { BRAND, EXPRISM } from '../../company-data'
  * 그림을 지어내지 않고 실물을 보여준다.
  */
 export default function ExprismPage() {
+  // 히어로의 문의 버튼. 이게 화면에서 사라지면 아래 고정 버튼이 올라온다.
+  const heroCta = useRef(null)
   return (
     <SiteShell title="EXPRISM">
-      <Hero />
+      <Hero ctaRef={heroCta} />
       <Guest />
       <Owner />
       <Languages />
       <Maker />
       <Closing />
-      <Dock />
+      <Dock watch={heroCta} />
     </SiteShell>
   )
 }
 
 /*
  * 좁은 화면에서만 보이는 하단 고정 버튼.
- * 화면이 길어서 아래로 내려가면 문의로 가는 길이 사라진다. 전화번호는 이 도메인에서
- * 쓰지 않기로 했으므로 버튼은 하나다.
+ *
+ * 히어로의 문의 버튼이 보이는 동안에는 나오지 않는다. 같은 버튼이 한 화면에 둘 있으면
+ * 아래 것이 가리기만 한다. 히어로 버튼이 위로 지나가고 나서야 아래에서 미끄러져 올라온다.
+ *
+ * 스크롤 이벤트 대신 IntersectionObserver 를 쓴다(이 프로젝트 규칙).
  */
-function Dock() {
+function Dock({ watch }) {
+  const [up, setUp] = useState(false)
+  useEffect(() => {
+    const target = watch?.current
+    if (!target) return undefined
+    const io = new IntersectionObserver(([e]) => setUp(!e.isIntersecting), { threshold: 0 })
+    io.observe(target)
+    return () => io.disconnect()
+  }, [watch])
+
   return (
-    <div className="ex-dock">
-      <Link className="kc-btn kc-btn-primary" to="/contact">
+    <div className={`ex-dock${up ? ' is-up' : ''}`} aria-hidden={!up}>
+      <Link className="kc-btn kc-btn-primary" to="/contact" tabIndex={up ? 0 : -1}>
         도입 문의하기
         <span className="material-symbols-outlined">arrow_forward</span>
       </Link>
@@ -42,25 +57,36 @@ function Dock() {
 }
 
 /* 좌우 분할. 왼쪽 글, 오른쪽 실제 주문 화면. */
-function Hero() {
+function Hero({ ctaRef }) {
   return (
     <section className="kc-hero ex-hero">
-      {/* 짙은 히어로 오른쪽 위에 로고를 크게, 아주 옅게 깔아 둔다.
-          제목과 겹치지 않는 자리라 읽는 데 방해가 없고, 첫 화면에 제품의 얼굴이 남는다. */}
-      <img className="ex-hero-watermark" src={BRAND_LOGO.icon} alt="" width="384" height="406" aria-hidden="true" />
-
       <div className="kc-hero-inner">
-        <p className="ex-mark">
-          <img src={BRAND_LOGO.icon} alt="" width="384" height="406" />
-          {BRAND.name} 자사 솔루션
-        </p>
+        {/* 제품의 얼굴. 배경 무늬로 깔면 아무도 못 알아보므로 제목 위에 제 크기로 세운다. */}
+        <img
+          className="ex-hero-logo"
+          src={BRAND_LOGO.icon}
+          alt="EXPRISM"
+          width="384"
+          height="406"
+          fetchPriority="high"
+        />
+        <p className="ex-mark">{EXPRISM.eyebrow}</p>
         <h1>
           테이블에 앉은 채로
           <br />
           주문이 끝납니다
         </h1>
-        <p className="kc-hero-lead">{EXPRISM.lead}</p>
-        <div className="kc-hero-actions">
+        {/*
+          "왜 지금인가" 를 첫 화면 안에서 못 박는 자리. 버튼 바로 위에 둬야
+          읽고 나서 곧장 문의로 넘어간다.
+
+          예전에는 여기에 제품 설명 한 줄(EXPRISM.lead)이 있었는데,
+          바로 아래 "손님은 앱을 깔지 않습니다" 구역 설명과 내용이 거의 같아 뺐다.
+          문단 셋을 연달아 쌓으면 첫 화면에서 버튼이 밀려난다.
+        */}
+        <p className="ex-stmt-line">{EXPRISM.statement}</p>
+        <p className="ex-stmt-sub">{EXPRISM.statementSub}</p>
+        <div className="kc-hero-actions" ref={ctaRef}>
           <Link className="kc-btn kc-btn-primary" to="/contact">
             도입 문의
             <span className="material-symbols-outlined">arrow_forward</span>
@@ -209,8 +235,9 @@ function Maker() {
     <section className="kc-sec" id="maker">
       <div className="kc-wrap ex-maker">
         <div>
+          {/* 여기에 EXPRISM 로고를 넣으면 "MADE BY EXPRISM" 처럼 읽혀 만든 쪽이 뒤집힌다.
+              이 섹션의 주인공은 만든 회사(KANCHENJUNGA)라 로고는 두지 않는다. */}
           <p className="ex-mark ex-mark-dark">MADE BY</p>
-          <img className="ex-maker-logo" src={BRAND_LOGO.wordmark} alt="EXPRISM" width="556" height="96" loading="lazy" />
           <h2>{BRAND.name} 가 만들고 운영합니다</h2>
           <p className="ex-maker-desc">
             {BRAND.name} 는 홈페이지 제작부터 이미 쓰고 계신 시스템의 유지보수까지 맡는 IT 서비스 회사입니다.
