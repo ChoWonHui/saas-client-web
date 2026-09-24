@@ -126,16 +126,22 @@ html:has(.kc) { scroll-behavior: smooth; }
 
 /* 워드마크는 항상 대문자 + 자간을 벌려 로고처럼 읽히게 한다 (EXPRISM .wordmark 규칙과 같다). */
 .kc-logo { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
-.kc-logo-mark { font-family: 'Hanken Grotesk', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: .14em; color: #fff; }
-.kc-logo-sub { font-size: 9.5px; letter-spacing: .26em; color: rgba(255, 255, 255, .6); }
-.kc-head.is-solid .kc-logo-mark { color: var(--kc-text); }
-.kc-head.is-solid .kc-logo-sub { color: var(--kc-text-3); }
+/* 회사 로고 — 투명 산 아이콘 + 워드마크 텍스트(span). */
+.kc-logo-icon-kc { height: 40px; width: auto; display: block; flex: none; }
+/* 푸터(어두운 바탕) — 아이콘 + 흰 워드마크가 든 조합 로고(투명).
+   데스크톱은 125px 로 크게, 모바일은 화면 폭에 맞춰 줄어든다(90~125px). */
+/* 두 클래스로 우선순위를 올려, 뒤에 오는 .kc-foot-logo(height:22px)에 덮이지 않게 한다. */
+.kc-foot-logo.kc-foot-logo-kc { height: clamp(90px, 26vw, 125px); width: auto; max-width: 100%; margin-bottom: 16px; }
+.kc-logo-mark { font-family: 'Montserrat', 'Hanken Grotesk', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: .08em; color: #fff; line-height: 1; }
+.kc-logo-sub { font-size: 9.5px; letter-spacing: .26em; color: #fff; line-height: 1; }
+.kc-head.is-solid .kc-logo-mark { color: #001653; }
+.kc-head.is-solid .kc-logo-sub { color: #001653; }
 
 /* 제품(EXPRISM) 로고 자물쇠.
    아이콘 + 워드마크 + 회사명 한 줄. 상단바 높이가 72px 이라 아이콘은 30px 로 잡는다. */
 .kc-logo-lockup { display: flex; align-items: center; gap: 11px; }
 .kc-logo-icon { width: auto; height: 32px; display: block; }
-.kc-logo-text { display: flex; flex-direction: column; gap: 3px; }
+.kc-logo-text { display: flex; flex-direction: column; gap: 2px; }
 /* 워드마크 두 벌(흰 글자·남색 글자)을 같은 자리에 겹쳐 두고 상단바 상태에 따라 갈아 끼운다.
    따로 놓으면 상태가 바뀔 때 폭이 흔들린다. */
 .kc-logo-words { position: relative; display: block; height: 17px; }
@@ -212,7 +218,7 @@ html:has(.kc) { scroll-behavior: smooth; }
 }
 .kc-drawer.open { transform: translateX(0); }
 .kc-drawer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.kc-drawer-head .kc-logo-mark { color: var(--kc-text); font-size: 17px; }
+.kc-drawer-head .kc-logo-mark { color: #001653; font-size: 17px; }
 .kc-drawer-x { border: 0; background: none; color: var(--kc-text-3); cursor: pointer; display: grid; place-items: center; padding: 4px; }
 .kc-drawer a:not(.kc-btn) { display: block; padding: 15px 4px; font-size: 16px; font-weight: 600; color: var(--kc-text-2); border-bottom: 1px solid var(--kc-line); }
 .kc-drawer a.on:not(.kc-btn) { color: var(--kc-accent); }
@@ -1083,4 +1089,121 @@ html:has(.kc) { scroll-behavior: smooth; }
   .kc-map { height: 300px; }
   .kc-foot-grid { grid-template-columns: 1fr; gap: 30px; }
   .kc-cta-inner { padding: 64px 20px; }
+}
+
+/* ===== 공지 게시판 (2026-09-11) =====
+   목록은 기존 .kc-notice 선 기반 구성을 그대로 쓰고, 여기서는 그 위에 얹는
+   분류 고르기 / 페이지 이동 / 상세 본문만 더한다.
+   카드 껍데기를 새로 만들지 않는다 - 이 사이트는 가로선으로 구분한다. */
+
+/* 분류 고르기. 왼쪽 정렬이 기본이라 .kc-chips(가운데)를 쓰지 않고 따로 둔다. */
+.kc-notice-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+.kc-notice-chip {
+  height: 34px; padding: 0 15px; border: 1px solid var(--kc-line); border-radius: 999px;
+  background: var(--kc-surface); color: var(--kc-text-2);
+  font-size: 13.5px; font-weight: 600; cursor: pointer; transition: .15s;
+}
+.kc-notice-chip:hover { border-color: var(--kc-accent); color: var(--kc-accent); }
+.kc-notice-chip.on { border-color: var(--kc-accent); background: var(--kc-accent); color: #fff; }
+
+/* 목록 한 줄 전체가 링크다. 제목만 누르게 하면 표적이 작아 모바일에서 잘 안 눌린다. */
+.kc-notice-link { display: block; color: inherit; }
+.kc-notice-link:hover h3 { color: var(--kc-accent); }
+
+.kc-tag-pin { background: var(--kc-accent); color: #fff; }
+
+.kc-pager { margin-top: 36px; display: flex; align-items: center; gap: 16px; }
+.kc-pager-btn {
+  height: 40px; padding: 0 18px; border: 1px solid var(--kc-line); border-radius: var(--kc-r-s);
+  background: var(--kc-surface); color: var(--kc-text); font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.kc-pager-btn:hover:not(:disabled) { border-color: var(--kc-accent); color: var(--kc-accent); }
+.kc-pager-btn:disabled { opacity: .4; cursor: default; }
+.kc-pager-info { font-size: 14px; color: var(--kc-text-3); }
+
+/* ----- 상세 ----- */
+.kc-article { max-width: 820px; }
+.kc-article-title {
+  margin-top: 14px; font-size: clamp(26px, 3.2vw, 34px); font-weight: 800;
+  line-height: 1.35; letter-spacing: -.02em;
+}
+.kc-article-meta { margin-top: 18px; padding-bottom: 22px; border-bottom: 1px solid var(--kc-line); }
+
+/* 에디터가 만든 HTML 이 들어온다. 태그별 기본 모양을 여기서 정해 준다. */
+.kc-article-body { padding: 30px 0 40px; font-size: 16px; line-height: 1.9; color: var(--kc-text); }
+.kc-article-body > * + * { margin-top: 16px; }
+.kc-article-body h1, .kc-article-body h2, .kc-article-body h3 {
+  margin-top: 34px; font-weight: 700; line-height: 1.45;
+}
+.kc-article-body h1 { font-size: 24px; }
+.kc-article-body h2 { font-size: 21px; }
+.kc-article-body h3 { font-size: 18px; }
+/* 전역 reset 이 ul 의 list-style 을 없애 두었다. 본문은 에디터가 만든 임의의 HTML 이 들어오므로
+   여기서만 되살린다(li 에 revert 를 걸면 ul 쪽 선언이 이겨서 불릿이 안 나온다). */
+.kc-article-body ul { list-style: disc; padding-left: 22px; }
+.kc-article-body ol { list-style: decimal; padding-left: 22px; }
+.kc-article-body li { margin-top: 8px; }
+.kc-article-body li::marker { color: var(--kc-text-3); }
+.kc-article-body a { color: var(--kc-accent); text-decoration: underline; }
+.kc-article-body img { max-width: 100%; height: auto; border-radius: var(--kc-r); }
+.kc-article-body blockquote {
+  padding: 4px 0 4px 18px; border-left: 3px solid var(--kc-accent); color: var(--kc-text-2);
+}
+.kc-article-body table { width: 100%; border-collapse: collapse; }
+.kc-article-body th, .kc-article-body td {
+  padding: 10px 12px; border: 1px solid var(--kc-line); text-align: left; font-size: 15px;
+}
+.kc-article-body th { background: var(--kc-surface-2); font-weight: 700; }
+/* 넓은 표가 페이지를 가로로 밀지 않게 본문 안에서만 스크롤한다. */
+.kc-article-body { overflow-x: auto; }
+
+.kc-article-nav {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  border-top: 1px solid var(--kc-line); border-bottom: 1px solid var(--kc-line);
+}
+.kc-article-nav-item {
+  display: block; padding: 20px 22px 20px 0; color: inherit; min-width: 0;
+}
+.kc-article-nav-item + .kc-article-nav-item { border-left: 1px solid var(--kc-line); padding-left: 22px; }
+.kc-article-nav-item.is-empty { color: var(--kc-text-3); font-size: 14px; }
+.kc-article-nav-label { display: block; font-size: 12.5px; font-weight: 700; color: var(--kc-accent); }
+.kc-article-nav-title {
+  display: block; margin-top: 6px; font-size: 15px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+a.kc-article-nav-item:hover .kc-article-nav-title { color: var(--kc-accent); }
+
+.kc-article-actions { margin-top: 34px; }
+
+@media (max-width: 720px) {
+  .kc-article-nav { grid-template-columns: 1fr; }
+  .kc-article-nav-item + .kc-article-nav-item {
+    border-left: 0; border-top: 1px solid var(--kc-line); padding-left: 0;
+  }
+}
+
+/* ===== 회사소개 · 브랜드 아이덴티티 섹션 ===== */
+.kc-brand-gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.kc-brand-item { margin: 0; }
+.kc-brand-thumb {
+  display: grid; place-items: center; aspect-ratio: 4 / 3; padding: 20px;
+  background: #fff; border: 1px solid var(--kc-line); border-radius: var(--kc-r);
+}
+.kc-brand-thumb img { max-width: 100%; max-height: 100%; width: auto; height: auto; display: block; }
+.kc-brand-item figcaption { margin-top: 12px; }
+.kc-brand-item figcaption strong { display: block; font-size: 14px; font-weight: 800; color: var(--kc-text); }
+.kc-brand-item figcaption span { font-size: 12.5px; color: var(--kc-text-3); }
+@media (max-width: 720px) { .kc-brand-gallery { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
+.kc-brand-values {
+  list-style: none; margin: 28px 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+}
+.kc-brand-values li {
+  display: flex; flex-direction: column; gap: 4px;
+  padding-left: 14px; border-left: 2px solid var(--kc-accent);
+}
+.kc-brand-values strong { font-size: 15px; font-weight: 800; color: var(--kc-accent); letter-spacing: .01em; }
+.kc-brand-values span { font-size: 14px; color: var(--kc-ink-2); }
+@media (max-width: 720px) {
+  .kc-brand-values { grid-template-columns: repeat(2, 1fr); gap: 14px 16px; }
 }

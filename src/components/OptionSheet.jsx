@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Icon from './Icon'
+import BankAccountBox from './BankAccountBox'
+import BankSendBar from './BankSendBar'
 import { won, unitPrice, optionsExtra } from '../cart'
 import { youtubeId, youtubeThumb, youtubeEmbed } from '../youtube'
 import { useI18n } from '../i18n-context'
@@ -12,7 +14,7 @@ import { useI18n } from '../i18n-context'
  * readOnly 면 주문이 없는 가게(메뉴판 전용)라 담기·수량을 감춘다.
  * 옵션은 "이런 선택지가 있다" 는 안내로만 남기고 고를 수 없게 한다.
  */
-export default function OptionSheet({ item, onClose, onAdd, readOnly = false }) {
+export default function OptionSheet({ item, onClose, onAdd, readOnly = false, account, onToast }) {
   const { tr, L } = useI18n()
   const groups = item.optionGroups || []
   // 단일 선택 그룹은 required 면 첫 옵션을 기본 선택.
@@ -126,12 +128,21 @@ export default function OptionSheet({ item, onClose, onAdd, readOnly = false }) 
               })}
             </div>
           ))}
+
+          {/* 입금 계좌 안내. 주문이 잠긴 가게(FREE)는 이체가 유일한 결제 수단이고,
+              주문을 받는 가게에서도 계좌를 확인하려는 손님이 있어 양쪽 모두에 보여준다.
+              (결제창의 '계좌이체' 수단과는 별개다) */}
+          <BankAccountBox account={account} onCopied={onToast} />
         </div>
 
+        {/* 메뉴판 전용(readOnly): 하단에 송금 바를 고정한다 — 스크롤 없이 바로 송금.
+            (닫기는 상단 X 로) 계좌가 없으면 BankSendBar 가 스스로 아무것도 그리지 않는다. */}
         {readOnly ? (
-          <div className="sheet-foot">
-            <button className="btn-primary" onClick={onClose}>{L('menuOnlyClose')}</button>
-          </div>
+          account && (
+            <div className="sheet-foot">
+              <BankSendBar account={account} onCopied={onToast} />
+            </div>
+          )
         ) : (
         <div className="sheet-foot">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>

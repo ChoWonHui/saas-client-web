@@ -26,13 +26,13 @@ export default function SiteShell({ children, solidHeader = false, title }) {
 }
 
 /**
- * exprism.co.kr 은 제품 홍보 전용이다. 회사 메뉴(회사정보·디자인 시안 등)를 띄우지 않고
- * 제품 안에서만 움직이게 한다. 회사 소개가 필요하면 kanchenjunga.co.kr 로 보낸다.
+ * 이 저장소(saas-client-web)는 이제 EXPRISM 제품 사이트 전용이다(회사 사이트는 saas-admin-web).
+ * 따라서 여기의 SiteShell 은 항상 제품(EXPRISM) 브랜딩·메뉴를 쓴다.
+ * 예전에는 한 빌드가 두 도메인을 태워서 호스트(exprism.co.kr)로 갈랐지만, 이제 그럴 필요가 없다.
+ * (localhost 개발에서도 EXPRISM 으로 보여야 하므로 호스트 판정에 기대지 않는다.)
  */
-/** 지금 보고 있는 주소가 제품 사이트(exprism.co.kr)인가. 화면 문구와 항목이 여기서 갈린다. */
 export function isProductHost() {
-  if (typeof window === 'undefined') return false
-  return /(^|\.)exprism\.co\.kr$/i.test(window.location.hostname)
+  return true
 }
 
 /**
@@ -61,6 +61,29 @@ export const BRAND_LOGO = {
 }
 
 /**
+ * KANCHENJUNGA(회사) 로고 에셋. 앱과 함께 배포되는 정적 파일(public/brand/)이다.
+ * 이미지는 <b>불투명(흰 배경)</b>이라 헤더/푸터의 어두운 바탕 위에서는 흰 라운드 배지로 감싸 얹는다.
+ */
+// 파일명이 같아 브라우저가 옛 이미지를 캐시하므로 버전 쿼리로 무효화한다. 로고를 바꾸면 숫자를 올린다.
+// KANCHENJUNGA 로고도 이미지 서버(S3+CloudFront)에서 받는다 — 앱에 정적 파일로 박지 않는다.
+const KC = `${CDN}/kanchenjunga`
+const KC_LOGO = {
+  // 밝은 배경용(불투명, 흰 카드 갤러리에서 사용)
+  icon: `${KC}/icon.png`,
+  wordmark: `${KC}/wordmark.png`,
+  combined: `${KC}/combined.png`,
+  typography: `${KC}/typography.png`,
+  // 투명 배경(헤더/푸터 등 어떤 바탕 위에서도 자연스럽게)
+  iconMark: `${KC}/icon-mark.png`,        // 파란 산 아이콘(투명)
+  wordmarkLight: `${KC}/wordmark-light.png`, // 흰 워드마크(어두운 바탕용)
+  wordmarkDark: `${KC}/wordmark-dark.png`,   // 남색 워드마크(밝은 바탕용)
+  wordmarkEnLight: `${KC}/wordmark-en-light.png`, // KANCHENJUNGA 한 줄(흰)
+  wordmarkEnDark: `${KC}/wordmark-en-dark.png`,   // KANCHENJUNGA 한 줄(남색)
+  combinedLight: `${KC}/combined-light.png`, // 아이콘 + 흰 워드마크(어두운 바탕용)
+  combinedDark: `${KC}/combined-dark.png`,   // 아이콘 + 남색 워드마크(밝은 바탕용)
+}
+
+/**
  * 상단바 로고.
  *
  * exprism.co.kr 은 제품 사이트라 로고 그림을 쓴다. 상단바는 맨 위에서는 투명(짙은 배경),
@@ -69,11 +92,16 @@ export const BRAND_LOGO = {
  */
 function BrandMark() {
   if (!isProductHost()) {
+    // 회사(KANCHENJUNGA) 로고 — 투명 산 아이콘 + 워드마크 텍스트(span).
+    // 글자 색은 브랜드 남색에 맞춘다(히어로 위에서는 흰색, 스크롤 후 흰 헤더에서는 남색).
     return (
-      <>
-        <span className="kc-logo-mark">{brandMark().mark}</span>
-        <span className="kc-logo-sub">{brandMark().sub}</span>
-      </>
+      <span className="kc-logo-lockup">
+        <img className="kc-logo-icon-kc" src={KC_LOGO.iconMark} alt="" width="1346" height="967" />
+        <span className="kc-logo-text">
+          <span className="kc-logo-mark">{brandMark().mark}</span>
+          <span className="kc-logo-sub">{brandMark().sub}</span>
+        </span>
+      </span>
     )
   }
   return (
@@ -256,7 +284,12 @@ function SiteHeader({ solid }) {
         <div className="kc-drawer-head">
           {isProductHost()
             ? <img className="kc-logo-word kc-logo-word-solo" src={BRAND_LOGO.wordmark} alt="EXPRISM" width="556" height="96" />
-            : <span className="kc-logo-mark">{brandMark().mark}</span>}
+            : (
+              <span className="kc-logo-lockup">
+                <img className="kc-logo-icon-kc" src={KC_LOGO.iconMark} alt="" width="1346" height="967" />
+                <span className="kc-logo-mark">{brandMark().mark}</span>
+              </span>
+            )}
           <button type="button" className="kc-drawer-x" aria-label="메뉴 닫기" onClick={() => setOpen(false)}>
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -340,17 +373,28 @@ function SiteFooter() {
           <div>
             {/* 제품 도메인에서는 만든 회사(KANCHENJUNGA) 이름 위에 제품 로고를 세운다.
                 여기 적힌 주소·사업자번호는 회사 것이므로 회사 이름은 그대로 둔다. */}
-            {isProductHost() && (
+            {isProductHost() ? (
+              <>
+                <img
+                  className="kc-foot-logo"
+                  src={BRAND_LOGO.wordmarkLight}
+                  alt="EXPRISM"
+                  width="556"
+                  height="96"
+                  loading="lazy"
+                />
+                <h4>{BRAND.name}</h4>
+              </>
+            ) : (
               <img
-                className="kc-foot-logo"
-                src={BRAND_LOGO.wordmarkLight}
-                alt="EXPRISM"
-                width="556"
-                height="96"
+                className="kc-foot-logo kc-foot-logo-kc"
+                src={KC_LOGO.combinedLight}
+                alt="KANCHENJUNGA 칸첸중가"
+                width="1385"
+                height="886"
                 loading="lazy"
               />
             )}
-            <h4>{BRAND.name}</h4>
             <p>
               {CONTACT.address}
               <br />

@@ -16,6 +16,7 @@ export default function TableOrderPage({ mode = 'table' }) {
   const { tenantCode, tableCode } = useParams()
   const navigate = useNavigate()
   const takeout = mode === 'takeout'
+  const parcel = mode === 'parcel'
   const { lang, changeLang, translating, tr, L, registerTexts } = useI18n()
 
   const [loading, setLoading] = useState(true)
@@ -55,11 +56,17 @@ export default function TableOrderPage({ mode = 'table' }) {
     setLoading(true)
     setFatal('')
     setStopped(false)
-    const head = takeout ? shopApi.takeout(tenantCode) : shopApi.table(tenantCode, tableCode)
+    const head = parcel ? shopApi.parcel(tenantCode)
+      : takeout ? shopApi.takeout(tenantCode)
+      : shopApi.table(tenantCode, tableCode)
     Promise.all([head, shopApi.menu(tenantCode)])
       .then(([t, m]) => {
         if (!alive) return
-        if (takeout) {
+        if (parcel) {
+          // 택배 받기가 꺼져 있으면 '택배 미제공' 화면.
+          if (!t.parcelAvailable) { setShop(t); setStopped(true); return }
+          setShop({ ...t, tableLabel: '택배 주문' })
+        } else if (takeout) {
           // 포장주문이 꺼져 있으면 '정지' 화면(이미 인쇄된 QR로 들어온 경우).
           if (!t.takeoutAvailable) { setShop(t); setStopped(true); return }
           setShop({ ...t, tableLabel: '포장 주문' })
@@ -78,21 +85,21 @@ export default function TableOrderPage({ mode = 'table' }) {
       })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [tenantCode, tableCode, takeout])
+  }, [tenantCode, tableCode, takeout, parcel])
 
-  // 내 주문 내역 — 테이블은 테이블코드로, 포장은 이 기기에 기억한 주문 id 로 조회. 종료/취소는 뺀다.
+  // 내 주문 내역 — 테이블·포장·택배 모두 '이 기기에 기억한 주문 id' 로 조회한다
+  // (비로그인이라 손님 특정 불가 → 내가 넣은 주문만 보이게).
+  // 완료·취소된 주문도 '지난 내역' 으로 함께 보여준다(진행 중/지난 구분은 시트에서). 최신순 정렬.
   const loadMyOrders = useCallback(async () => {
     try {
-      let list
-      if (takeout) {
-        const ids = loadOrderIds(tenantCode)
-        list = ids.length ? await shopApi.ordersByIds(tenantCode, ids) : []
-      } else {
-        list = await shopApi.tableOrders(tenantCode, tableCode)
-      }
-      setMyOrders((list || []).filter((o) => o.status !== 'CLOSED' && o.status !== 'CANCELLED'))
+      const ids = loadOrderIds(tenantCode)
+      const list = ids.length ? await shopApi.ordersByIds(tenantCode, ids) : []
+      setMyOrders((list || []).slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')))
     } catch { /* 조용히 무시 — 다음 폴링에서 재시도 */ }
-  }, [takeout, tenantCode, tableCode])
+  }, [tenantCode])
+
+  // 배지에 쓰는 '진행 중' 건수 (완료/취소 제외).
+  const activeCount = myOrders.filter((o) => o.status !== 'CLOSED' && o.status !== 'CANCELLED').length
 
   // 메뉴가 열려 있는 동안 12초마다 진행 상태 갱신.
   useEffect(() => {
@@ -170,7 +177,7 @@ export default function TableOrderPage({ mode = 'table' }) {
   }
   function removeLine(key) { setCart((prev) => prev.filter((l) => l.key !== key)) }
 
-  async function submit(memo, paymentMethod) {
+  async function submit(memo, paymentMethod, shipping) {
     if (cart.length === 0) return
     setSubmitting(true)
     try {
@@ -184,17 +191,19 @@ export default function TableOrderPage({ mode = 'table' }) {
         paymentKey: pay.paymentKey,
         items: toOrderItems(cart),
       }
-      const res = takeout
-        ? await shopApi.placeTakeoutOrder(tenantCode, payload)
-        : await shopApi.placeOrder(tenantCode, tableCode, payload)
-      rememberOrder(tenantCode, res.orderId) // 이 기기 주문으로 기억(포장 조회용)
+      const res = parcel
+        ? await shopApi.placeParcelOrder(tenantCode, { ...payload, shipping })
+        : takeout
+          ? await shopApi.placeTakeoutOrder(tenantCode, payload)
+          : await shopApi.placeOrder(tenantCode, tableCode, payload)
+      rememberOrder(tenantCode, res.orderId) // 이 기기 쿠키에 기억(테이블·포장·택배 '내 주문' 조회용)
       setPlaced(res)
       setCart([])
       setCartOpen(false)
       loadMyOrders() // 방금 넣은 주문을 바로 내역에 반영
     } catch (e) {
-      // 접수 직전에 포장주문이 꺼진 경우 → 정지 화면으로.
-      if (takeout && /정지/.test(e.message)) { setCartOpen(false); setStopped(true) }
+      // 접수 직전에 포장/택배가 꺼진 경우 → 정지 화면으로.
+      if (e.code === 'TAKEOUT_STOPPED' || e.code === 'PARCEL_STOPPED') { setCartOpen(false); setStopped(true) }
       else showToast(e.message)
     } finally {
       setSubmitting(false)
@@ -274,8 +283,8 @@ export default function TableOrderPage({ mode = 'table' }) {
       <div className="screen">
         <div className="screen-inner">
           <span className="material-symbols-outlined" style={{ color: 'var(--c-text-3)' }}>pause_circle</span>
-          <h2>{L('takeoutStopTitle')}</h2>
-          <p>{L('takeoutStopSub')}</p>
+          <h2>{parcel ? L('parcelStopTitle') : L('takeoutStopTitle')}</h2>
+          <p>{parcel ? L('parcelStopSub') : L('takeoutStopSub')}</p>
         </div>
       </div>
     )
@@ -286,7 +295,7 @@ export default function TableOrderPage({ mode = 'table' }) {
         <div className="screen-inner">
           <span className="material-symbols-outlined done-check" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
           <h2>{L('payDone')}</h2>
-          <p>{L('payDoneSub')}<br />{takeout ? L('payDoneTakeout') : L('payDoneTable')}</p>
+          <p>{L('payDoneSub')}<br />{parcel ? L('payDoneParcel') : takeout ? L('payDoneTakeout') : L('payDoneTable')}</p>
           <span className="done-order-no">{L('orderNo')} {placed.orderNo} · {won(placed.totalAmount)}</span>
           <button className="btn-primary" onClick={() => setPlaced(null)}>{L('seeMoreMenu')}</button>
           <button className="myo-link" onClick={() => { setPlaced(null); setMyOpen(true) }}>{L('seeMyOrders')}</button>
@@ -297,6 +306,8 @@ export default function TableOrderPage({ mode = 'table' }) {
 
   const showHome = home?.published
   const hasInfo = showHome && (home.intro || home.hours || home.phone || home.address || home.notice)
+  // 판매자(사업자) 정보 — head 응답(table/takeout)이 실어 준다. home 발행 여부와 무관하게 항상 있다.
+  const biz = shop?.business
 
   return (
     <div className="app">
@@ -307,7 +318,7 @@ export default function TableOrderPage({ mode = 'table' }) {
         <div className="topbar-left">
           <div className="topbar-shop">{shop?.shopName}</div>
           {home?.tagline && <div className="topbar-tag">{tr(home.tagline)}</div>}
-          <span className="topbar-table"><Icon name={takeout ? 'takeout_dining' : 'table_restaurant'} />{takeout ? L('takeoutLabel') : tr(shop?.tableLabel)}</span>
+          <span className="topbar-table"><Icon name={parcel ? 'local_shipping' : takeout ? 'takeout_dining' : 'table_restaurant'} />{parcel ? L('parcelLabel') : takeout ? L('takeoutLabel') : tr(shop?.tableLabel)}</span>
         </div>
         <div className="topbar-right">
           {translating && <span className="lang-loading">{L('translating')}</span>}
@@ -315,7 +326,7 @@ export default function TableOrderPage({ mode = 'table' }) {
           {canOrder && myOrders.length > 0 && (
             <button className="myo-btn" onClick={() => setMyOpen(true)}>
               <Icon name="receipt_long" /> {L('myOrders')}
-              <span className="myo-count">{myOrders.length}</span>
+              {activeCount > 0 && <span className="myo-count">{activeCount}</span>}
             </button>
           )}
           {/* 가게 홈 — 가게 소개 랜딩(미니룸/소개)으로. 가게소개 메뉴판 뷰의 '가게 홈'과 동일. */}
@@ -391,6 +402,24 @@ export default function TableOrderPage({ mode = 'table' }) {
             : <div className="ld-ad tbl-ad"><span className="ld-ad-tag">AD</span><img src={ad.imageUrl} alt={ad.text || '광고'} />{ad.text && <span className="ld-ad-text">{ad.text}</span>}</div>
         )}
 
+        {/* 판매자(사업자) 정보 푸터 — tenant 정보로 자동 구성. 값이 있는 줄만 그린다.
+            전자상거래법상 결제 화면에 판매 주체를 밝히기 위한 것으로, 상호 외 표기할 값이
+            하나도 없으면(hasDetail 없음) 통째로 숨긴다(가게명은 이미 상단바에 있다). */}
+        {biz && (biz.ownerName || biz.businessNo || biz.mailOrderSalesNo || biz.phone || biz.email || biz.address) && (
+          <footer className="order-footer">
+            <div className="of-title">{L('ftSeller')}</div>
+            <dl className="of-rows">
+              <div className="of-row"><dt>{shop?.shopName}</dt></div>
+              {biz.ownerName && <div className="of-row"><dt>{L('ftOwner')}</dt><dd>{biz.ownerName}</dd></div>}
+              {biz.businessNo && <div className="of-row"><dt>{L('ftBizNo')}</dt><dd>{biz.businessNo}</dd></div>}
+              {biz.mailOrderSalesNo && <div className="of-row"><dt>{L('ftMailOrder')}</dt><dd>{biz.mailOrderSalesNo}</dd></div>}
+              {biz.phone && <div className="of-row"><dt>{L('ftTel')}</dt><dd><a href={`tel:${biz.phone}`}>{biz.phone}</a></dd></div>}
+              {biz.email && <div className="of-row"><dt>{L('ftEmail')}</dt><dd><a href={`mailto:${biz.email}`}>{biz.email}</a></dd></div>}
+              {biz.address && <div className="of-row"><dt>{L('ftAddr')}</dt><dd>{biz.address}</dd></div>}
+            </dl>
+          </footer>
+        )}
+
       </div>
 
       {canOrder && totals.count > 0 && (
@@ -406,12 +435,20 @@ export default function TableOrderPage({ mode = 'table' }) {
       )}
 
       {optionItem && (
-        <OptionSheet item={optionItem} onClose={() => setOptionItem(null)} onAdd={addToCart} readOnly={!canOrder} />
+        <OptionSheet
+          item={optionItem}
+          onClose={() => setOptionItem(null)}
+          onAdd={addToCart}
+          readOnly={!canOrder}
+          account={shop?.account}
+          onToast={showToast}
+        />
       )}
       {cartOpen && (
         <CartSheet
           cart={cart}
           total={totals.amount}
+          parcel={parcel}
           onClose={() => setCartOpen(false)}
           onQty={setQty}
           onRemove={removeLine}

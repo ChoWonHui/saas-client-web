@@ -284,6 +284,16 @@ img { display: block; }
 .menu { flex: 1; padding: 8px 0 calc(12px + var(--sab)); }
 /* 장바구니 바(고정)가 떠 있을 때만 그만큼 하단 여백을 준다. 비어 있으면 하단 공백 없이 딱 맞춘다. */
 .menu.with-cart { padding-bottom: calc(92px + var(--sab)); }
+/* 판매자(사업자) 정보 푸터 — 메뉴 스크롤 맨 끝. 어두운 차콜 배경 + 밝은 회색 글씨. */
+.order-footer { margin-top: 20px; padding: 20px 18px calc(20px + var(--sab)); background: #2a2a2f; color: #b7b7c0; }
+.of-title { font-size: 12px; font-weight: 800; color: #e6e6ec; letter-spacing: .02em; margin-bottom: 12px; }
+.of-rows { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.of-row { display: flex; gap: 8px; font-size: 12px; line-height: 1.5; color: #b7b7c0; }
+.of-row dt { flex: none; min-width: 92px; margin: 0; color: #85858f; }
+.of-row:first-child dt { min-width: 0; font-weight: 800; color: #f0f0f4; font-size: 13px; }
+.of-row dd { margin: 0; word-break: break-all; color: #cfcfd6; }
+.of-row dd a { color: inherit; text-decoration: none; }
+
 .menu-section { padding: 14px 18px 4px; }
 .menu-section h2 { margin: 0; font-size: 16px; font-weight: 800; color: var(--c-text); }
 .menu-list { display: flex; flex-direction: column; }
@@ -365,11 +375,14 @@ img { display: block; }
 @keyframes fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes slideup { from { transform: translateY(100%) } to { transform: translateY(0) } }
 .sheet-grip { width: 40px; height: 4px; border-radius: 999px; background: var(--c-line); margin: 10px auto 4px; flex: none; }
-.sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 18px 12px; }
+.sheet-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 8px 18px 12px; }
 .sheet-head h3 { margin: 0; font-size: 18px; font-weight: 800; }
 .sheet-close { border: 0; background: var(--c-surface-2); border-radius: 50%; width: 34px; height: 34px; display: grid; place-items: center; color: var(--c-text-2); cursor: pointer; }
-.sheet-body { overflow-y: auto; padding: 0 18px; }
-.sheet-foot { padding: 12px 18px calc(16px + var(--sab)); border-top: 1px solid var(--c-line); }
+/* 본문만 스크롤되게 경계를 준다. 이게 없으면 내용이 길 때 flex 가 하단 푸터를 눌러 줄여
+   푸터 위쪽(자동복사 멘트 등)이 잘린다. */
+.sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 18px; }
+/* 푸터는 절대 줄지 않게 — 멘트+버튼이 항상 온전히 보이도록. */
+.sheet-foot { flex: none; padding: 12px 18px calc(16px + var(--sab)); border-top: 1px solid var(--c-line); }
 
 /* ── 상세 시트 영상(시트 열면 음소거 자동재생) ── */
 .opt-video {
@@ -434,6 +447,33 @@ img { display: block; }
   padding: 12px 14px; font-size: 14px; font-family: inherit; resize: none; background: var(--c-surface-2);
 }
 .cart-memo:focus { outline: none; border-color: var(--c-primary); background: var(--c-surface); }
+/* 택배 배송지 입력 */
+.ship { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--c-line); }
+.ship-title { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--c-text-2); margin-bottom: 10px; }
+.ship-title .material-symbols-outlined { font-size: 18px; }
+.ship-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ship-input {
+  width: 100%; border: 1px solid var(--c-line); border-radius: 10px;
+  padding: 11px 12px; font-size: 14px; font-family: inherit; background: var(--c-surface-2);
+}
+.ship-input:focus { outline: none; border-color: var(--c-primary); background: var(--c-surface); }
+.ship-wide { grid-column: 1 / -1; }
+/* 우편번호·주소는 직접 입력 불가 — 검색으로만 채운다. 눌러도 커서(타이핑) 대신 검색창을 연다. */
+.ship-readonly { cursor: pointer; background: var(--c-bg, #f4f4f7); color: var(--c-text, #111827); }
+.ship-readonly:focus { border-color: var(--c-line); background: var(--c-bg, #f4f4f7); }
+.ship-search {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  border: 1px solid var(--c-primary, #2f6feb); border-radius: 10px; cursor: pointer;
+  background: var(--c-primary-soft, #eef3fd); color: var(--c-primary, #2f6feb);
+  font-size: 13.5px; font-weight: 700; padding: 11px 12px;
+}
+.ship-search .material-symbols-outlined { font-size: 18px; }
+/* 주소 검색(임베드) 오버레이 — 시트 위에 뜨고, 모바일에서 화면을 크게 차지한다. */
+.post-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; padding: 12px; }
+.post-box { width: 100%; max-width: 460px; height: min(560px, 88dvh); display: flex; flex-direction: column; background: var(--c-surface, #fff); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.3); }
+.post-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--c-line); font-size: 15px; font-weight: 800; }
+.post-embed { flex: 1 1 auto; min-height: 0; }
+.post-embed > * { width: 100% !important; height: 100% !important; }
 /* 결제 수단 선택(선불) */
 .paym { margin-top: 16px; }
 .paym-title { font-size: 13px; font-weight: 700; color: var(--c-text-2); margin-bottom: 8px; }
@@ -488,6 +528,8 @@ img { display: block; }
 .empty p { margin: 10px 0 0; font-size: 14px; }
 
 /* ── 내 주문 내역 시트 ── */
+.myo-group { font-size: 12px; font-weight: 700; color: var(--c-text-3); letter-spacing: .02em; padding: 14px 0 4px; }
+.myo-group:first-child { padding-top: 2px; }
 .myo-order { padding: 16px 0; border-bottom: 1px solid var(--c-line); }
 .myo-order.cancelled { opacity: .6; }
 .myo-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
@@ -600,3 +642,50 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 .ld-video-foot { flex: none; display: flex; align-items: center; justify-content: flex-end; }
 
 /* 회사 소개(root) 스타일은 company.css 로 옮겼다 — IntroPage.jsx 에서만 import 한다. */
+
+/* ===== 입금 계좌 안내 (2026-09-11) =====
+   메뉴 상세 시트 안에 들어간다. 손님이 직접 이체할 때 보는 값이라
+   계좌번호를 가장 크게 두고, 눌러서 바로 복사되게 했다. */
+/* 입금계좌 한 줄 — 라벨 + 은행/계좌(마스킹) + 보기 토글. 복사 버튼 없음(송금 시 자동복사). */
+.bank-line {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-top: 12px; padding: 9px 11px;
+  border: 1px solid var(--c-line, #e5e7eb); border-radius: 10px;
+  background: var(--c-bg-2, #f7f8fa); font-size: 13px;
+}
+.bank-label {
+  flex: none; padding: 2px 7px; border-radius: 999px;
+  background: var(--c-primary-soft, #eef3fd); color: var(--c-primary, #2f6feb);
+  font-size: 11.5px; font-weight: 700;
+}
+.bank-val { flex: 1 1 auto; min-width: 0; color: var(--c-text, #111827); font-weight: 600; word-break: break-all; }
+.bank-reveal {
+  flex: none; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--c-line, #e5e7eb); background: #fff;
+  color: var(--c-text-2, #4b5563); font-size: 12px; font-weight: 700;
+}
+.bank-reveal:active { background: #f3f4f6; }
+
+/* 송금 앱 선택(콤보박스) + 송금 버튼. 시트 하단(sheet-foot)에 고정돼 항상 보인다. 기본은 토스. */
+.bank-send-note { margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--c-text-2, #6b7280); text-align: center; }
+/* 앱 미설치 안내 — 송금 바 아래. 눈에 띄게 경고색으로. */
+.bank-send-notice { margin-top: 8px; padding: 8px 10px; border-radius: 8px; background: #fdecec; color: #c0392b; font-size: 12.5px; font-weight: 600; text-align: center; }
+.bank-apps-label { font-size: 12px; font-weight: 700; color: var(--c-text-2, #6b7280); margin-bottom: 10px; }
+.bank-send-row { display: flex; gap: 8px; align-items: stretch; }
+.bank-select {
+  flex: 1 1 auto; min-width: 0; padding: 12px; font-size: 14px; font-weight: 600;
+  color: var(--c-text, #111827); background: #fff;
+  border: 1px solid var(--c-line, #e5e7eb); border-radius: 10px; cursor: pointer;
+}
+.bank-send-btn {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 12px 18px; border: 0; border-radius: 10px; cursor: pointer;
+  background: #0064ff; color: #fff; font-size: 14px; font-weight: 800; white-space: nowrap;
+}
+.bank-send-btn:active { background: #0056db; }
+.bank-send-btn .material-symbols-outlined { font-size: 18px; }
+.bank-apps-hint {
+  margin-top: 10px; font-size: 11.5px; line-height: 1.45;
+  color: var(--c-text-2, #6b7280);
+}

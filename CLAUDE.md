@@ -1,14 +1,20 @@
-# saas-client-web — 화면 개발 규칙
+# saas-client-web — EXPRISM 제품 사이트 개발 규칙
 
-이 저장소는 두 가지를 서빙한다.
+이 저장소는 **EXPRISM 제품 사이트(exprism.co.kr)** 를 서빙한다.
 
-1. **KANCHENJUNGA 회사 사이트** — root(`/`) 와 고정 경로들 (`/company`, `/biz-area/consulting`, `/design`, `/notice`, `/contact`)
-2. **EXPRISM 손님 주문앱** — QR 로 들어오는 `/{업체코드}/{테이블코드}`. 로그인 없음
+1. **EXPRISM 제품 소개** — root(`/`) 와 `/exprism` (`ExprismPage`)
+2. **EXPRISM 손님 주문앱** — QR 로 들어오는 `/{업체코드}/{테이블코드}`(테이블)·`/takeout`(포장)·`/parcel`(택배). 로그인 없음
 
 > **KANCHENJUNGA 는 회사, EXPRISM 은 그 회사가 만든 제품이다.**
-> 코드 곳곳의 EXPRISM 표기는 제품 브랜딩이므로 바꾸지 않는다.
+> **KANCHENJUNGA 회사 소개 사이트(kanchenjunga.co.kr)는 saas-admin-web 으로 옮겼다(2026-09-22).**
+> saas-admin-web 의 root(/) 와 고정 경로들(/company, /notice …)이 회사 사이트이고,
+> /admin·/console 은 콘솔이다. 이 저장소(client-web)에는 회사 사이트 화면이 더 이상 없다.
+> 단, `ExprismPage`(exprism.co.kr 제품 소개)가 회사용 셸을 재사용하므로
+> `SiteShell.jsx` · `company-data.js` · `company.css` 는 EXPRISM 랜딩용으로 여기 남아 있다.
 
-배포는 카페24(`jsj32166.mycafe24.com`) 정적 호스팅. `.\deploy.ps1` 한 줄로 빌드·업로드한다.
+빌드·배포: `npm run build:exprism` → `dist` → 3.38.178.93 `/opt/saas-client-web/dist` (nginx, exprism.co.kr).
+아래 taste-skill 규칙은 원래 **회사 사이트** 대상이었다 — 그 부분은 이제 saas-admin-web 의 회사 페이지에 적용된다.
+여기서는 EXPRISM 주문앱(모바일)이 taste-skill 대상이 아니라는 원칙만 유효하다.
 
 ---
 

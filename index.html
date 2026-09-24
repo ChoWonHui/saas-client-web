@@ -5,12 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="description" content="테이블에서 바로 주문하세요." />
     <meta name="theme-color" content="#ffffff" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- 네이버 서치어드바이저 사이트 소유 확인.
+         값은 도메인마다 다르다. 한 index.html 로 두 사이트를 서빙하므로 빌드할 때 갈아 끼운다.
+             kanchenjunga.co.kr →  npm run build:kanchenjunga   (.env.kanchenjunga)
+             exprism.co.kr      →  npm run build:exprism        (.env.exprism)
+         그냥 `npm run build` 로 만들면 값이 비어 태그가 빠진다(잘못된 코드가 나가는 것보다 낫다). -->
+    <meta name="naver-site-verification" content="%VITE_NAVER_VERIFY%" />
+    <!-- 이 저장소는 EXPRISM 전용. 파비콘도 이미지 서버(S3+CloudFront)의 EXPRISM 아이콘을 쓴다(로컬 파일 아님). -->
+    <link rel="icon" type="image/png" href="https://d2ziky4ycezd5d.cloudfront.net/saas-admin/brand/exprism-icon-128-v2.png" />
+    <link rel="apple-touch-icon" href="https://d2ziky4ycezd5d.cloudfront.net/saas-admin/brand/exprism-icon-128-v2.png" />
     <title>테이블 주문</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap"
       rel="stylesheet"
     />
     <!-- 회사 사이트 본문 글꼴. 한글과 라틴 자소의 높이·굵기가 맞물려 섞어 써도 어긋나지 않는다. -->
