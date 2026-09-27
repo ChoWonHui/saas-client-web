@@ -3,6 +3,17 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import TableOrderPage from './pages/TableOrderPage'
 import StoreLandingPage from './pages/StoreLandingPage'
 import ExprismPage from './pages/company/ExprismPage'
+// KANCHENJUNGA 회사 소개 화면. 헤더(NAV_EXPRISM)의 '회사정보' 메뉴가 이 경로들로 이어진다.
+// 회사 사이트(kanchenjunga.co.kr)는 saas-admin-web 이 맡지만, exprism.co.kr 안에서도
+// 도메인을 벗어나지 않고 회사정보를 볼 수 있도록 같은 화면을 여기에도 둔다.
+import AboutPage from './pages/company/AboutPage'
+import GreetingPage from './pages/company/GreetingPage'
+import OrgPage from './pages/company/OrgPage'
+import ConsultingPage from './pages/company/ConsultingPage'
+import DesignPage from './pages/company/DesignPage'
+import NoticePage from './pages/company/NoticePage'
+import NoticeDetailPage from './pages/company/NoticeDetailPage'
+import ContactPage from './pages/company/ContactPage'
 import { I18nProvider } from './i18n-context'
 
 // 이 프로젝트는 EXPRISM 제품 사이트(exprism.co.kr) 전용이다.
@@ -46,6 +57,17 @@ export default function App() {
           {/* EXPRISM 제품 소개 — 루트. /exprism 도 같은 화면(구 링크 호환). */}
           <Route path="/" element={<ExprismPage />} />
           <Route path="/exprism" element={<ExprismPage />} />
+
+          {/* KANCHENJUNGA 회사 소개 — exprism.co.kr 안에서도 회사정보를 볼 수 있게 둔다.
+              정적 경로라 아래 /:tenantCode(동적) 보다 라우터가 먼저 매칭한다. */}
+          <Route path="/company" element={<AboutPage />} />
+          <Route path="/company/greeting" element={<GreetingPage />} />
+          <Route path="/company/org" element={<OrgPage />} />
+          <Route path="/biz-area/consulting" element={<ConsultingPage />} />
+          <Route path="/design" element={<DesignPage />} />
+          <Route path="/notice" element={<NoticePage />} />
+          <Route path="/notice/:id" element={<NoticeDetailPage />} />
+          <Route path="/contact" element={<ContactPage />} />
 
           {/* 손님 주문앱 — 포장·택배 전용 경로는 고정 문자열이라 테이블 경로보다 먼저 둔다. */}
           <Route path="/:tenantCode/takeout" element={orderApp ? <TableOrderPage mode="takeout" /> : <Navigate to="/" replace />} />
