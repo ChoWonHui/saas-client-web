@@ -420,7 +420,7 @@ function SiteFooter() {
             <h5>고객지원</h5>
             <ul className="kc-foot-links">
               <li>
-                <a href={`mailto:${CONTACT.email}`}>이메일 문의</a>
+                <Link to="/contact">이메일 문의</Link>
               </li>
               {/* 관리자 콘솔 로그인. 콘솔은 kanchenjunga.co.kr(admin-web)에만 있으므로 절대주소로 넘긴다. */}
               <li>
