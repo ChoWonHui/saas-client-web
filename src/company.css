@@ -615,6 +615,18 @@ html:has(.kc) { scroll-behavior: smooth; }
 .ex-lang-shot { border-color: rgb(255 255 255 / 14%); background: rgb(255 255 255 / 6%); }
 .ex-lang-shot img { width: 100%; }
 
+/* 발음 도우미 홍보(다국어 섹션 안, 어두운 배경 위) */
+.ex-pron { margin-top: 34px; padding-top: 28px; border-top: 1px solid rgb(255 255 255 / 14%); }
+.ex-pron-title { font-size: 18px; font-weight: 700; color: #fff; margin: 0 0 18px; }
+.ex-pron-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.ex-pron-list li { display: flex; gap: 13px; align-items: flex-start; }
+.ex-pron-list .material-symbols-outlined { flex: none; width: 40px; height: 40px; border-radius: 10px;
+  display: grid; place-items: center; font-size: 22px; color: #fff;
+  background: rgb(255 255 255 / 12%); }
+.ex-pron-list strong { display: block; font-size: 15.5px; color: #fff; margin-bottom: 3px; }
+.ex-pron-list span:not(.material-symbols-outlined) { font-size: 14px; line-height: 1.7; color: rgb(226 235 250 / 80%); }
+.ex-pron-list em { font-style: italic; color: #a9c6ff; font-weight: 600; }
+
 @media (max-width: 960px) {
   .ex-shots { grid-template-columns: 1fr 1fr; }
   .ex-feat { grid-template-columns: 1fr; }

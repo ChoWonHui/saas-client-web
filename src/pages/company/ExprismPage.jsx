@@ -210,6 +210,27 @@ function Languages() {
               <li key={l}>{l}</li>
             ))}
           </ul>
+
+          {/* 발음 도우미 — 외국인이 읽고 듣고 따라 말할 수 있게. */}
+          <div className="ex-pron">
+            <h3 className="ex-pron-title">외국인도 메뉴 이름을 읽고 말할 수 있어요</h3>
+            <ul className="ex-pron-list">
+              <li>
+                <span className="material-symbols-outlined">translate</span>
+                <div>
+                  <strong>로마자 발음 표기</strong>
+                  <span>김치찌개 → <em>Kimchijjigae</em> 처럼 메뉴 이름을 알파벳 발음으로 보여줘, 직원에게 그대로 말해 주문할 수 있습니다.</span>
+                </div>
+              </li>
+              <li>
+                <span className="material-symbols-outlined">volume_up</span>
+                <div>
+                  <strong>발음 듣기 (음성)</strong>
+                  <span>메뉴 옆 🔊 버튼을 누르면 한국어 발음을 소리로 들려줍니다. 듣고 따라 말하면 됩니다.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
         <div className="ex-shot ex-lang-shot">
           <img
