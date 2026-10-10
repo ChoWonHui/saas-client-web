@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import Icon from './Icon'
 import { useI18n } from '../i18n-context'
-import { bankName } from '../i18n'
 import { openLauncher, pickLauncherUrl, copyText } from '../banks'
+
+// 외국어 보기면 서버가 준 영문명(nameEn)을, 없으면 한국어명으로 폴백. 하드코딩하지 않는다.
+const bankLabel = (b, lang) => (lang !== 'ko' && b?.nameEn ? b.nameEn : b?.name)
 import { shopApi } from '../api/client'
 
 // 서버(공통코드) 목록을 못 받을 때의 최소 폴백 — 토스 송금만이라도 동작하게.
@@ -55,7 +57,7 @@ export default function BankSendBar({ account, amount, onCopied }) {
       <div className="bank-send-row">
         <select className="bank-select" value={selected} onChange={(e) => setSelected(e.target.value)}>
           {banks.map((b) => (
-            <option key={b.code} value={b.code}>{bankName(b.name, lang)}</option>
+            <option key={b.code} value={b.code}>{bankLabel(b, lang)}</option>
           ))}
         </select>
         <button type="button" className="bank-send-btn" onClick={handleSend}>

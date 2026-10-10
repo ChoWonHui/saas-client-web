@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useI18n } from '../i18n-context'
-import { bankName } from '../i18n'
 
 /**
  * 입금 계좌 안내(정보 표시, 한 줄·소형).
@@ -24,7 +23,7 @@ export default function BankAccountBox({ account }) {
     <div className="bank-line">
       <span className="bank-label">{L('bankTitle')}</span>
       <span className="bank-val">
-        {bankName(account.bankName, lang)} {shownNo}
+        {(lang !== 'ko' && account.bankNameEn) ? account.bankNameEn : account.bankName} {shownNo}
         {shown && account.accountHolder ? ` · ${account.accountHolder}` : ''}
       </span>
       <button type="button" className="bank-reveal" onClick={() => setShown((s) => !s)}>

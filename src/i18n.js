@@ -154,27 +154,5 @@ export function ui(key, lang) {
   return row[lang] || row.ko || key
 }
 
-// 은행명 다국어 표기. 서버 공통코드는 한국어("신한은행")로 오므로, 여기서 언어별로 바꿔 보여준다.
-// 자동번역은 고유명사(은행 이름)를 어색하게 바꾸기도 해서 고정 매핑으로 둔다. 매핑에 없으면 원문 유지.
-const BANKS = {
-  '토스뱅크': { en: 'Toss Bank', ja: 'トスバンク', zh: 'Toss银行', es: 'Toss Bank' },
-  '토스': { en: 'Toss', ja: 'トス', zh: 'Toss', es: 'Toss' },
-  '농협은행': { en: 'NH Nonghyup Bank', ja: 'NH農協銀行', zh: '农协银行', es: 'NH Nonghyup Bank' },
-  '신한은행': { en: 'Shinhan Bank', ja: '新韓銀行', zh: '新韩银行', es: 'Shinhan Bank' },
-  '우리은행': { en: 'Woori Bank', ja: 'ウリ銀行', zh: '友利银行', es: 'Woori Bank' },
-  '하나은행': { en: 'Hana Bank', ja: 'ハナ銀行', zh: '韩亚银行', es: 'Hana Bank' },
-  'SC제일은행': { en: 'SC First Bank', ja: 'SC第一銀行', zh: 'SC第一银行', es: 'SC First Bank' },
-  '카카오뱅크': { en: 'KakaoBank', ja: 'カカオバンク', zh: 'Kakao银行', es: 'KakaoBank' },
-  '국민은행': { en: 'KB Kookmin Bank', ja: 'KB国民銀行', zh: 'KB国民银行', es: 'KB Kookmin Bank' },
-  '케이뱅크': { en: 'K Bank', ja: 'Kバンク', zh: 'K银行', es: 'K Bank' },
-  '기업은행': { en: 'IBK Industrial Bank', ja: 'IBK企業銀行', zh: 'IBK企业银行', es: 'IBK Industrial Bank' },
-  '새마을금고': { en: 'MG Community Credit', ja: 'セマウル金庫', zh: '新村金库', es: 'MG Community Credit' },
-  '우체국': { en: 'Post Office Bank', ja: '郵便局', zh: '邮政银行', es: 'Post Office Bank' },
-}
-
-/** 한국어 은행명을 현재 언어로. 매핑에 없으면 원문 그대로 둔다. */
-export function bankName(name, lang) {
-  if (!name || lang === 'ko') return name
-  const row = BANKS[name.trim()]
-  return (row && row[lang]) || name
-}
+// 은행명 다국어는 서버 공통코드(BANK_CD)의 영문명(nameEn)으로 내려받는다. 프런트에 하드코딩하지 않는다.
+// → 외국어 보기면 nameEn, 없으면 한국어명으로 폴백(각 컴포넌트에서 처리).
