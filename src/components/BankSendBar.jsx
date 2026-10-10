@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Icon from './Icon'
 import { useI18n } from '../i18n-context'
+import { bankName } from '../i18n'
 import { openLauncher, pickLauncherUrl, copyText } from '../banks'
 import { shopApi } from '../api/client'
 
@@ -16,7 +17,7 @@ const FALLBACK = [{ code: 'toss', name: '토스', url: 'supertoss://send?bank={b
  * account 가 없으면 아무것도 그리지 않는다.
  */
 export default function BankSendBar({ account, amount, onCopied }) {
-  const { L } = useI18n()
+  const { L, lang } = useI18n()
   const [banks, setBanks] = useState(FALLBACK)
   const [selected, setSelected] = useState(FALLBACK[0].code)
   const [notice, setNotice] = useState('') // 앱 미설치 안내
@@ -54,7 +55,7 @@ export default function BankSendBar({ account, amount, onCopied }) {
       <div className="bank-send-row">
         <select className="bank-select" value={selected} onChange={(e) => setSelected(e.target.value)}>
           {banks.map((b) => (
-            <option key={b.code} value={b.code}>{b.name}</option>
+            <option key={b.code} value={b.code}>{bankName(b.name, lang)}</option>
           ))}
         </select>
         <button type="button" className="bank-send-btn" onClick={handleSend}>
