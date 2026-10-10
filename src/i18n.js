@@ -39,6 +39,7 @@ const UI = {
   video:         { ko: '영상',       en: 'Video',       ja: '動画',         zh: '视频',       es: 'Video' },
   emptyMenu:     { ko: '아직 등록된 메뉴가 없어요.', en: 'No menu items yet.', ja: 'まだ登録されたメニューがありません。', zh: '暂无菜单。', es: 'Aún no hay menú.' },
   tapForSound:   { ko: '탭하여 소리', en: 'Tap for sound', ja: 'タップで音声', zh: '点击开启声音', es: 'Toca para sonido' },
+  listen:        { ko: '발음 듣기', en: 'Listen', ja: '発音を聞く', zh: '听发音', es: 'Escuchar' },
   loading:       { ko: '가게 정보를 불러오는 중…', en: 'Loading store…', ja: '店舗情報を読み込み中…', zh: '正在加载店铺信息…', es: 'Cargando tienda…' },
   notFound:      { ko: '가게를 찾을 수 없어요', en: 'Store not found', ja: '店舗が見つかりません', zh: '找不到店铺', es: 'Tienda no encontrada' },
   storeInfo:     { ko: '가게 소개',   en: 'About',       ja: '店舗紹介',     zh: '店铺介绍',   es: 'Acerca de' },

@@ -11,6 +11,8 @@ import { requestPayment } from '../payment'
 import { rememberOrder, loadOrderIds } from '../myorders'
 import { won, unitPrice, optionsText, lineKey, toOrderItems } from '../cart'
 import { useI18n } from '../i18n-context'
+import { romanize } from '../romanize'
+import { speakKorean, speakSupported } from '../speak'
 
 export default function TableOrderPage({ mode = 'table' }) {
   const { tenantCode, tableCode } = useParams()
@@ -380,7 +382,23 @@ export default function TableOrderPage({ mode = 'table' }) {
                     )}
                   </div>
                   <div className="item-main">
-                    <div className="item-name">{tr(it.name)}</div>
+                    <div className="item-name-row">
+                      <span className="item-name">{tr(it.name)}</span>
+                      {speakSupported() && (
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          className="item-speak"
+                          aria-label={L('listen')}
+                          onClick={(e) => { e.stopPropagation(); speakKorean(it.name) }}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); speakKorean(it.name) } }}
+                        >
+                          <Icon name="volume_up" />
+                        </span>
+                      )}
+                    </div>
+                    {/* 외국어로 보는 중이면 한국어 발음을 로마자로 — 직원에게 말로 주문할 때 쓴다. */}
+                    {lang !== 'ko' && <div className="item-roman">{romanize(it.name)}</div>}
                     {it.description && <div className="item-desc">{tr(it.description)}</div>}
                     <div className="item-bottom">
                       <span className="item-price">{won(it.price)}</span>
