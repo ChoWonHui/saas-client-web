@@ -1233,3 +1233,25 @@ a.kc-article-nav-item:hover .kc-article-nav-title { color: var(--kc-accent); }
 @media (max-width: 720px) {
   .kc-brand-values { grid-template-columns: repeat(2, 1fr); gap: 14px 16px; }
 }
+
+/* ===== 회원가입(/signup) ===== */
+.su-form { max-width: 620px; }
+.su-error { color: #dc2626; font-size: 14px; margin: 6px 0 0; }
+.su-submit { width: 100%; margin-top: 8px; }
+.su-help { margin-top: 14px !important; text-align: center; font-size: 13.5px; color: var(--kc-text-3); }
+.su-help a { color: var(--kc-accent); font-weight: 600; }
+
+/* 가입 완료 */
+.su-done { max-width: 480px; margin: 0 auto; text-align: center;
+  border: 1px solid var(--kc-line); border-radius: var(--kc-r); padding: clamp(32px, 5vw, 52px) 28px; background: var(--kc-surface); }
+.su-done-ic { font-size: 56px; color: #16a34a; }
+.su-done h2 { font-size: clamp(22px, 3vw, 28px); font-weight: 800; margin: 12px 0 8px; }
+.su-done p { color: var(--kc-text-2); font-size: 15px; line-height: 1.7; }
+.su-done-info { display: flex; flex-direction: column; gap: 10px; margin: 24px 0; padding: 20px;
+  background: var(--kc-bg); border-radius: var(--kc-r-s); text-align: left; }
+.su-done-info > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.su-done-info dt { color: var(--kc-text-3); font-size: 14px; }
+.su-done-info dd { margin: 0; font-weight: 700; color: var(--kc-text); }
+.su-code { font-family: ui-monospace, Menlo, monospace; font-size: 18px !important; color: var(--kc-accent) !important; letter-spacing: .05em; }
+.su-done-btn { width: 100%; }
+.su-done-note { font-size: 12.5px !important; color: var(--kc-text-3) !important; margin-top: 16px !important; }

@@ -78,7 +78,7 @@ export const NAV_EXPRISM = [
       { to: '/company/org', label: '조직도' },
     ],
   },
-  { to: '/contact', label: '도입 문의' },
+  { to: '/signup', label: '회원가입' },
 ]
 
 /** 푸터·검색처럼 계층이 필요 없는 곳에서 쓸 평평한 목록. */

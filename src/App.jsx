@@ -14,6 +14,7 @@ import DesignPage from './pages/company/DesignPage'
 import NoticePage from './pages/company/NoticePage'
 import NoticeDetailPage from './pages/company/NoticeDetailPage'
 import ContactPage from './pages/company/ContactPage'
+import SignupPage from './pages/company/SignupPage'
 import { I18nProvider } from './i18n-context'
 
 // 이 프로젝트는 EXPRISM 제품 사이트(exprism.co.kr) 전용이다.
@@ -68,6 +69,7 @@ export default function App() {
           <Route path="/notice" element={<NoticePage />} />
           <Route path="/notice/:id" element={<NoticeDetailPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/signup" element={<SignupPage />} />
 
           {/* 손님 주문앱 — 포장·택배 전용 경로는 고정 문자열이라 테이블 경로보다 먼저 둔다. */}
           <Route path="/:tenantCode/takeout" element={orderApp ? <TableOrderPage mode="takeout" /> : <Navigate to="/" replace />} />

@@ -80,6 +80,11 @@ export const homeInquiryApi = {
   create: (payload) => request('/public/home-inquiries', { method: 'POST', body: payload }),
 }
 
+// 회원가입(무인증) — 손님이 직접 아이디·비밀번호를 정해 가입. 승인 없이 바로 사용.
+export const signupApi = {
+  create: (payload) => request('/public/signup', { method: 'POST', body: payload }),
+}
+
 // 회사 사이트 공지사항(무인증). 공개된 글만 내려온다 — 초안은 서버가 걸러 준다.
 export const homeNoticeApi = {
   list: ({ category = '', keyword = '', page = 0, size = 10 } = {}) => {
